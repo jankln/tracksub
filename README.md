@@ -294,4 +294,4 @@ Your Name - [@jankln](https://github.com/jankln)
 
 ---
 
-**Made with ❤️ by [Your Name]**
+**Made with ❤️ by [Jan Klein]**
