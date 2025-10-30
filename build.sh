@@ -3,17 +3,15 @@
 set -o errexit
 
 # Install backend dependencies
-cd backend
-npm install
+npm install --prefix backend
 
 # Build TypeScript
-npm run build
+npm run build --prefix backend
 
 # Install frontend dependencies and build
-cd ../frontend
-npm install
-npm run build
+npm install --prefix frontend
+npm run build --prefix frontend
 
 # Copy frontend build to backend public folder
-mkdir -p ../backend/dist/public
-cp -r build/* ../backend/dist/public/
+mkdir -p backend/dist/public
+cp -r frontend/build/* backend/dist/public/
