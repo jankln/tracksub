@@ -2,16 +2,28 @@
 # exit on error
 set -o errexit
 
+echo "Current directory: $(pwd)"
+echo "Listing files:"
+ls -la
+
 # Install backend dependencies
-npm install --prefix backend
+echo "Installing backend dependencies..."
+npm install --prefix ./backend
 
 # Build TypeScript
-npm run build --prefix backend
+echo "Building backend..."
+npm run build --prefix ./backend
 
 # Install frontend dependencies and build
-npm install --prefix frontend
-npm run build --prefix frontend
+echo "Installing frontend dependencies..."
+npm install --prefix ./frontend
+
+echo "Building frontend..."
+npm run build --prefix ./frontend
 
 # Copy frontend build to backend public folder
-mkdir -p backend/dist/public
-cp -r frontend/build/* backend/dist/public/
+echo "Copying frontend build..."
+mkdir -p ./backend/dist/public
+cp -r ./frontend/build/* ./backend/dist/public/
+
+echo "Build completed successfully!"
