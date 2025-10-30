@@ -283,7 +283,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-Your Name - [@yourhandle](https://github.com/jankln)
+Your Name - [@jankln](https://github.com/jankln)
 
 ## 🙏 Acknowledgments
 
