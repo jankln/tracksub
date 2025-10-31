@@ -30,7 +30,7 @@ Add these 5 environment variables:
 
 ```
 EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
+EMAIL_PORT=465
 EMAIL_USER=your.email@gmail.com
 EMAIL_PASS=xxxx xxxx xxxx xxxx
 EMAIL_FROM=your.email@gmail.com

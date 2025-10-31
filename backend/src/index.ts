@@ -17,6 +17,51 @@ app.use('/api/auth', authRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/settings', settingsRouter);
 
+// Debug endpoint to check subscriptions and dates
+app.get('/api/notifications/debug', async (req, res) => {
+  try {
+    const { User, Subscription } = await import('./models');
+    const users = await User.findAll({
+      attributes: ['id', 'email', 'notification_days'],
+    });
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const debug: any = {
+      today: today.toISOString().split('T')[0],
+      users: []
+    };
+    
+    for (const user of users) {
+      const notificationDays = user.notification_days || 7;
+      const targetDate = new Date(today);
+      targetDate.setDate(targetDate.getDate() + notificationDays);
+      
+      const subscriptions = await Subscription.findAll({
+        where: { user_id: user.id },
+        attributes: ['id', 'name', 'next_payment_date', 'status']
+      });
+      
+      debug.users.push({
+        email: user.email,
+        notification_days: notificationDays,
+        target_date: targetDate.toISOString().split('T')[0],
+        subscriptions: subscriptions.map(s => ({
+          name: s.name,
+          next_payment_date: s.next_payment_date,
+          status: s.status,
+          matches: s.next_payment_date === targetDate.toISOString().split('T')[0]
+        }))
+      });
+    }
+    
+    res.json(debug);
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
 // Manual trigger for testing email notifications
 app.post('/api/notifications/test', async (req, res) => {
   try {
