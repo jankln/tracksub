@@ -60,21 +60,23 @@ const HomePage = () => {
 
   // Pie chart data
   const pieChartData = {
-    labels: subscriptions.map(sub => sub.name),
+    labels: subscriptions.filter(sub => sub.status === 'active').map(sub => sub.name),
     datasets: [
       {
-        data: subscriptions.map(sub => sub.amount),
+        data: subscriptions.filter(sub => sub.status === 'active').map(sub => sub.amount),
         backgroundColor: [
-          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-          '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+          '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981',
+          '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981'
         ],
+        borderWidth: 2,
+        borderColor: 'rgba(15, 23, 42, 0.8)',
       },
     ],
   };
 
   // Category chart data
   const categoryData: { [key: string]: number } = {};
-  subscriptions.forEach(sub => {
+  subscriptions.filter(sub => sub.status === 'active').forEach(sub => {
     if (categoryData[sub.category]) {
       categoryData[sub.category] += sub.amount;
     } else {
@@ -88,17 +90,19 @@ const HomePage = () => {
       {
         data: Object.values(categoryData),
         backgroundColor: Object.keys(categoryData).map(cat => getCategoryColor(cat).color),
+        borderWidth: 2,
+        borderColor: 'rgba(15, 23, 42, 0.8)',
       },
     ],
   };
 
   // Bar chart for monthly vs yearly
   const monthlyTotal = subscriptions
-    .filter(sub => sub.billing_cycle === 'monthly')
+    .filter(sub => sub.billing_cycle === 'monthly' && sub.status === 'active')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
   const yearlyTotal = subscriptions
-    .filter(sub => sub.billing_cycle === 'yearly')
+    .filter(sub => sub.billing_cycle === 'yearly' && sub.status === 'active')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
   const barChartData = {
@@ -107,7 +111,9 @@ const HomePage = () => {
       {
         label: 'Total Amount (€)',
         data: [monthlyTotal, yearlyTotal],
-        backgroundColor: ['#36A2EB', '#FF6384'],
+        backgroundColor: ['#6366f1', '#8b5cf6'],
+        borderWidth: 2,
+        borderColor: 'rgba(15, 23, 42, 0.8)',
       },
     ],
   };
@@ -125,16 +131,23 @@ const HomePage = () => {
     }
 
     subscriptions.forEach(sub => {
+      // Only count active subscriptions
+      if (sub.status !== 'active') return;
+      
       const startDate = new Date(sub.start_date);
+      startDate.setHours(0, 0, 0, 0);
       
       Object.keys(months).forEach(monthKey => {
         const [year, month] = monthKey.split('-').map(Number);
         const checkDate = new Date(year, month - 1, 1);
+        checkDate.setHours(0, 0, 0, 0);
         
+        // Check if subscription was active in this month
         if (checkDate >= startDate) {
           if (sub.billing_cycle === 'monthly') {
             months[monthKey] += sub.amount;
-          } else {
+          } else if (sub.billing_cycle === 'yearly') {
+            // For yearly, divide by 12 to get monthly cost
             months[monthKey] += sub.amount / 12;
           }
         }
@@ -155,9 +168,10 @@ const HomePage = () => {
       {
         label: 'Monthly Spending (€)',
         data: Object.values(monthlyHistory),
-        borderColor: '#36A2EB',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99, 102, 241, 0.2)',
         tension: 0.4,
+        fill: true,
       },
     ],
   };
@@ -168,6 +182,37 @@ const HomePage = () => {
     plugins: {
       legend: {
         position: 'bottom' as const,
+        labels: {
+          color: '#e2e8f0',
+          font: {
+            size: 12,
+          },
+        },
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+        titleColor: '#e2e8f0',
+        bodyColor: '#94a3b8',
+        borderColor: 'rgba(99, 102, 241, 0.5)',
+        borderWidth: 1,
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#94a3b8',
+        },
+        grid: {
+          color: 'rgba(99, 102, 241, 0.1)',
+        },
+      },
+      y: {
+        ticks: {
+          color: '#94a3b8',
+        },
+        grid: {
+          color: 'rgba(99, 102, 241, 0.1)',
+        },
       },
     },
   };
@@ -175,13 +220,25 @@ const HomePage = () => {
   const lineChartOptions = {
     ...chartOptions,
     scales: {
+      x: {
+        ticks: {
+          color: '#94a3b8',
+        },
+        grid: {
+          color: 'rgba(99, 102, 241, 0.1)',
+        },
+      },
       y: {
         beginAtZero: true,
         ticks: {
+          color: '#94a3b8',
           callback: function(value: any) {
-            return '€' + value;
+            return '€' + value.toFixed(2);
           }
-        }
+        },
+        grid: {
+          color: 'rgba(99, 102, 241, 0.1)',
+        },
       }
     }
   };
