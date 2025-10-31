@@ -6,6 +6,21 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
+/* Background gradient overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
 /* Container backgrounds */
 .container {
   background: transparent;
@@ -19,6 +34,12 @@ body {
   backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
   color: #e2e8f0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.card:hover {
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
 }
 
 .card-header {
@@ -34,6 +55,37 @@ body {
 
 .card-text {
   color: #94a3b8 !important;
+}
+
+/* ListGroup styling */
+.list-group {
+  background: transparent !important;
+}
+
+.list-group-item {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border: 1px solid rgba(99, 102, 241, 0.15) !important;
+  color: #e2e8f0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.list-group-item:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.list-group-flush .list-group-item {
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+}
+
+.list-group-flush .list-group-item:first-child {
+  border-top: 0 !important;
+}
+
+.list-group-flush .list-group-item:last-child {
+  border-bottom: 0 !important;
 }
 
 /* Form controls */
@@ -65,6 +117,11 @@ body {
   border: 1px solid rgba(99, 102, 241, 0.2) !important;
   color: #e2e8f0 !important;
   border-radius: 12px !important;
+}
+
+.form-select option {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
 }
 
 .form-select:focus {
@@ -140,6 +197,11 @@ body {
   background: rgba(99, 102, 241, 0.1) !important;
   border-color: rgba(99, 102, 241, 0.7) !important;
   color: #c7d2fe !important;
+}
+
+.btn-sm {
+  padding: 0.4rem 1rem !important;
+  font-size: 0.875rem !important;
 }
 
 /* Alert styling */
@@ -226,10 +288,46 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(59, 130, 246, 0.3) !important;
 }
 
+.badge.bg-light {
+  background: rgba(203, 213, 225, 0.15) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(203, 213, 225, 0.2) !important;
+}
+
 .badge.bg-primary {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
   color: white !important;
   border: none !important;
+}
+
+/* Modal styling */
+.modal-content {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+.modal-title {
+  color: #e2e8f0 !important;
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%) !important;
+}
+
+/* Spinner styling */
+.spinner-border {
+  color: #6366f1 !important;
 }
 
 /* Page background effect */
