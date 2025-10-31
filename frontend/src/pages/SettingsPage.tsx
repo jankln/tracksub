@@ -11,7 +11,7 @@ const SettingsPage = () => {
     const fetchSettings = async () => {
       try {
         const response = await api.get('/settings');
-        setNotificationDays(response.data.settings.notification_days_before || 1);
+        setNotificationDays(response.data.notification_days || 7);
       } catch (error) {
         console.error('Error fetching settings', error);
       }
@@ -22,7 +22,7 @@ const SettingsPage = () => {
 
   const handleSave = async () => {
     try {
-      await api.put('/settings', { notification_days_before: notificationDays });
+      await api.put('/settings', { notification_days: notificationDays });
       setMessage('Settings saved successfully!');
       setError('');
       setTimeout(() => setMessage(''), 3000);
@@ -71,17 +71,61 @@ const SettingsPage = () => {
           <hr />
           
           <Form.Group controlId="notificationDays" className="mb-3">
-            <Form.Label>Send notification this many days before payment:</Form.Label>
-            <Form.Control
-              type="number"
-              min="1"
-              max="30"
-              value={notificationDays}
-              onChange={(e) => setNotificationDays(parseInt(e.target.value))}
-            />
-            <Form.Text className="text-muted">
-              You'll receive an email {notificationDays} day{notificationDays !== 1 ? 's' : ''} before each payment is due.
-            </Form.Text>
+            <Form.Label><strong>Reminder Timing</strong></Form.Label>
+            <div className="mb-3">
+              <div className="d-flex gap-2 flex-wrap mb-2">
+                <Button 
+                  variant={notificationDays === 1 ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setNotificationDays(1)}
+                >
+                  1 day
+                </Button>
+                <Button 
+                  variant={notificationDays === 3 ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setNotificationDays(3)}
+                >
+                  3 days
+                </Button>
+                <Button 
+                  variant={notificationDays === 7 ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setNotificationDays(7)}
+                >
+                  1 week
+                </Button>
+                <Button 
+                  variant={notificationDays === 14 ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setNotificationDays(14)}
+                >
+                  2 weeks
+                </Button>
+                <Button 
+                  variant={notificationDays === 30 ? "primary" : "outline-primary"}
+                  size="sm"
+                  onClick={() => setNotificationDays(30)}
+                >
+                  1 month
+                </Button>
+              </div>
+              
+              <Form.Label className="mt-2">Or enter custom days:</Form.Label>
+              <Form.Control
+                type="number"
+                min="1"
+                max="90"
+                value={notificationDays}
+                onChange={(e) => setNotificationDays(parseInt(e.target.value) || 1)}
+                placeholder="Enter days before payment"
+              />
+            </div>
+            <Alert variant="info" className="mb-0">
+              <small>
+                📧 You'll receive an email <strong>{notificationDays} day{notificationDays !== 1 ? 's' : ''}</strong> before each payment is due.
+              </small>
+            </Alert>
           </Form.Group>
           
           <Button variant="primary" onClick={handleSave} className="me-2">

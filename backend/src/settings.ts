@@ -43,6 +43,11 @@ router.get('/', protectedRoute, async (req: AuthRequest, res: Response) => {
 router.put('/', protectedRoute, async (req: AuthRequest, res: Response) => {
   const { notification_days } = req.body;
   
+  // Validate notification_days
+  if (!notification_days || notification_days < 1 || notification_days > 90) {
+    return res.status(400).json({ message: 'Notification days must be between 1 and 90' });
+  }
+  
   try {
     await User.update(
       { notification_days },
