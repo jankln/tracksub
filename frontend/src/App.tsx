@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NavigationBar from './components/NavigationBar';
+import WelcomePage from './pages/WelcomePage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -16,21 +17,51 @@ function App() {
   };
 
   const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
-    return isAuthenticated() ? children : <Navigate to="/login" />;
+    return isAuthenticated() ? children : <Navigate to="/welcome" />;
+  };
+
+  const PublicRoute = ({ children }: { children: React.ReactElement }) => {
+    return !isAuthenticated() ? children : <Navigate to="/" />;
   };
 
   return (
     <Router>
-      <NavigationBar />
+      {isAuthenticated() && <NavigationBar />}
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/welcome"
+          element={
+            <PublicRoute>
+              <WelcomePage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/"
           element={
-            <PrivateRoute>
-              <HomePage />
-            </PrivateRoute>
+            isAuthenticated() ? (
+              <PrivateRoute>
+                <HomePage />
+              </PrivateRoute>
+            ) : (
+              <Navigate to="/welcome" />
+            )
           }
         />
         <Route
