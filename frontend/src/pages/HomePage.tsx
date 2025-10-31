@@ -58,12 +58,12 @@ const HomePage = () => {
   const inactiveCount = subscriptions.filter(sub => sub.status === 'inactive').length;
   const cancelledCount = subscriptions.filter(sub => sub.status === 'cancelled').length;
 
-  // Pie chart data
+  // Pie chart data - show all subscriptions
   const pieChartData = {
-    labels: subscriptions.filter(sub => sub.status === 'active').map(sub => sub.name),
+    labels: subscriptions.map(sub => sub.name),
     datasets: [
       {
-        data: subscriptions.filter(sub => sub.status === 'active').map(sub => sub.amount),
+        data: subscriptions.map(sub => sub.amount),
         backgroundColor: [
           '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981',
           '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981'
@@ -74,9 +74,9 @@ const HomePage = () => {
     ],
   };
 
-  // Category chart data
+  // Category chart data - show all subscriptions
   const categoryData: { [key: string]: number } = {};
-  subscriptions.filter(sub => sub.status === 'active').forEach(sub => {
+  subscriptions.forEach(sub => {
     if (categoryData[sub.category]) {
       categoryData[sub.category] += sub.amount;
     } else {
@@ -96,13 +96,13 @@ const HomePage = () => {
     ],
   };
 
-  // Bar chart for monthly vs yearly
+  // Bar chart for monthly vs yearly - show all subscriptions
   const monthlyTotal = subscriptions
-    .filter(sub => sub.billing_cycle === 'monthly' && sub.status === 'active')
+    .filter(sub => sub.billing_cycle === 'monthly')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
   const yearlyTotal = subscriptions
-    .filter(sub => sub.billing_cycle === 'yearly' && sub.status === 'active')
+    .filter(sub => sub.billing_cycle === 'yearly')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
   const barChartData = {
@@ -131,24 +131,28 @@ const HomePage = () => {
     }
 
     subscriptions.forEach(sub => {
-      // Only count active subscriptions
-      if (sub.status !== 'active') return;
-      
       const startDate = new Date(sub.start_date);
       startDate.setHours(0, 0, 0, 0);
       
       Object.keys(months).forEach(monthKey => {
         const [year, month] = monthKey.split('-').map(Number);
-        const checkDate = new Date(year, month - 1, 1);
-        checkDate.setHours(0, 0, 0, 0);
+        const monthStart = new Date(year, month - 1, 1);
+        const monthEnd = new Date(year, month, 0, 23, 59, 59);
         
-        // Check if subscription was active in this month
-        if (checkDate >= startDate) {
-          if (sub.billing_cycle === 'monthly') {
-            months[monthKey] += sub.amount;
-          } else if (sub.billing_cycle === 'yearly') {
-            // For yearly, divide by 12 to get monthly cost
-            months[monthKey] += sub.amount / 12;
+        // Check if subscription was active during this month
+        if (startDate <= monthEnd) {
+          // For active subscriptions, add them if they started before or during this month
+          // For inactive/cancelled, only add if they were active during this month
+          const shouldCount = sub.status === 'active' || 
+                             (startDate <= monthEnd && monthStart >= startDate);
+          
+          if (shouldCount) {
+            if (sub.billing_cycle === 'monthly') {
+              months[monthKey] += sub.amount;
+            } else if (sub.billing_cycle === 'yearly') {
+              // For yearly, divide by 12 to get monthly cost
+              months[monthKey] += sub.amount / 12;
+            }
           }
         }
       });
