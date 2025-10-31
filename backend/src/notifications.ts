@@ -1,64 +1,92 @@
 
 import cron from 'node-cron';
+import axios from 'axios';
 import nodemailer from 'nodemailer';
 import { User, Subscription, sequelize } from './models';
 import { Op } from 'sequelize';
 
-// Email configuration
+// Email configuration for fallback (development)
 const createTransporter = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  if (isProduction && process.env.EMAIL_HOST) {
-    // Production email service - use port 465 with SSL for Render compatibility
-    const port = parseInt(process.env.EMAIL_PORT || '465');
-    return nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: port,
-      secure: port === 465, // true for 465, false for other ports
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  } else {
-    // Development - use Ethereal (test email)
-    return nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER || 'test@ethereal.email',
-        pass: process.env.EMAIL_PASS || 'testpassword',
-      },
-    });
-  }
+  return nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL_USER || 'test@ethereal.email',
+      pass: process.env.EMAIL_PASS || 'testpassword',
+    },
+  });
 };
 
-// Send an email
+// Send an email using MailerSend (production) or Nodemailer (development)
 export const sendEmail = async (to: string, subject: string, text: string) => {
   try {
-    const transporter = createTransporter();
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"Tracksub" <noreply@tracksub.com>',
-      to,
-      subject,
-      text,
-      html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
-    });
+    const isProduction = process.env.NODE_ENV === 'production';
+    const emailFrom = process.env.EMAIL_FROM || 'noreply@tracksub.com';
+    const emailFromName = process.env.EMAIL_FROM_NAME || 'Tracksub Notifications';
 
-    console.log('\n=================================');
-    console.log('📧 EMAIL SENT SUCCESSFULLY!');
-    console.log('=================================');
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('Message ID:', info.messageId);
-    if (process.env.NODE_ENV !== 'production') {
+    if (isProduction && process.env.MAILERSEND_API_KEY) {
+      // Use MailerSend API in production
+      const htmlContent = `<p>${text.replace(/\n/g, '<br>')}</p>`;
+      
+      const response = await axios.post(
+        'https://api.mailersend.com/v1/email',
+        {
+          from: {
+            email: emailFrom,
+            name: emailFromName,
+          },
+          to: [
+            {
+              email: to,
+            },
+          ],
+          subject: subject,
+          text: text,
+          html: htmlContent,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.MAILERSEND_API_KEY}`,
+          },
+        }
+      );
+
+      console.log('\n=================================');
+      console.log('📧 EMAIL SENT SUCCESSFULLY! (MailerSend)');
+      console.log('=================================');
+      console.log('To:', to);
+      console.log('Subject:', subject);
+      console.log('Response:', response.status, response.statusText);
+      console.log('=================================\n');
+      return true;
+    } else {
+      // Use Nodemailer for development/testing
+      const transporter = createTransporter();
+      const info = await transporter.sendMail({
+        from: emailFrom,
+        to,
+        subject,
+        text,
+        html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
+      });
+
+      console.log('\n=================================');
+      console.log('📧 EMAIL SENT SUCCESSFULLY! (Ethereal)');
+      console.log('=================================');
+      console.log('To:', to);
+      console.log('Subject:', subject);
+      console.log('Message ID:', info.messageId);
       console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+      console.log('=================================\n');
+      return true;
     }
-    console.log('=================================\n');
-    return true;
   } catch (error) {
     console.error('❌ Error sending email:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('MailerSend API Error:', error.response.data);
+    }
     return false;
   }
 };
@@ -124,4 +152,4 @@ cron.schedule('0 0 * * *', async () => {
 
 console.log('✅ Email notification service started');
 console.log('📅 Cron job scheduled: Daily at midnight (00:00)');
-console.log(`📧 Email service: ${process.env.NODE_ENV === 'production' ? 'Production' : 'Development (Ethereal test)'}\n`);
+console.log(`📧 Email service: ${process.env.NODE_ENV === 'production' && process.env.MAILERSEND_API_KEY ? 'Production (MailerSend)' : 'Development (Ethereal test)'}\n`);
