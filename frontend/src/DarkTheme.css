@@ -1,0 +1,247 @@
+/* Global Dark Theme Styles */
+
+body {
+  background: #0a0e27 !important;
+  color: #e2e8f0 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+/* Container backgrounds */
+.container {
+  background: transparent;
+}
+
+/* Card styling */
+.card {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  color: #e2e8f0 !important;
+}
+
+.card-header {
+  background: rgba(99, 102, 241, 0.1) !important;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2) !important;
+  color: #e2e8f0 !important;
+}
+
+.card-title {
+  color: #e2e8f0 !important;
+  font-weight: 700 !important;
+}
+
+.card-text {
+  color: #94a3b8 !important;
+}
+
+/* Form controls */
+.form-control {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  color: #e2e8f0 !important;
+  border-radius: 12px !important;
+}
+
+.form-control:focus {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25) !important;
+  color: #e2e8f0 !important;
+}
+
+.form-control::placeholder {
+  color: #64748b !important;
+}
+
+.form-label {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+.form-select {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  color: #e2e8f0 !important;
+  border-radius: 12px !important;
+}
+
+.form-select:focus {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Button styling */
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6) !important;
+}
+
+.btn-secondary {
+  background: rgba(100, 116, 139, 0.2) !important;
+  border: 1px solid rgba(100, 116, 139, 0.3) !important;
+  color: #cbd5e1 !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(100, 116, 139, 0.3) !important;
+  border-color: rgba(100, 116, 139, 0.5) !important;
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.btn-success {
+  background: rgba(34, 197, 94, 0.2) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+  color: #86efac !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+.btn-success:hover {
+  background: rgba(34, 197, 94, 0.3) !important;
+  border-color: rgba(34, 197, 94, 0.5) !important;
+}
+
+.btn-outline-primary {
+  background: transparent !important;
+  border: 1px solid rgba(99, 102, 241, 0.5) !important;
+  color: #a5b4fc !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+.btn-outline-primary:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+  border-color: rgba(99, 102, 241, 0.7) !important;
+  color: #c7d2fe !important;
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 12px !important;
+  border: none !important;
+}
+
+.alert-success {
+  background: rgba(34, 197, 94, 0.1) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+  color: #86efac !important;
+}
+
+.alert-danger {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+}
+
+.alert-warning {
+  background: rgba(234, 179, 8, 0.1) !important;
+  border: 1px solid rgba(234, 179, 8, 0.3) !important;
+  color: #fde047 !important;
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #93c5fd !important;
+}
+
+/* Table styling */
+.table {
+  color: #e2e8f0 !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(99, 102, 241, 0.05) !important;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Text colors */
+.text-muted {
+  color: #94a3b8 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #e2e8f0 !important;
+  font-weight: 700 !important;
+}
+
+/* Badge styling */
+.badge {
+  border-radius: 8px !important;
+  padding: 0.35em 0.65em !important;
+  font-weight: 600 !important;
+}
+
+.badge.bg-success {
+  background: rgba(34, 197, 94, 0.2) !important;
+  color: #86efac !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+.badge.bg-danger {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.badge.bg-warning {
+  background: rgba(234, 179, 8, 0.2) !important;
+  color: #fde047 !important;
+  border: 1px solid rgba(234, 179, 8, 0.3) !important;
+}
+
+.badge.bg-info {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.badge.bg-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Page background effect */
+.mt-4, .container {
+  position: relative;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease !important;
+}
+
+button, .btn, a {
+  transition: all 0.3s ease !important;
+}
