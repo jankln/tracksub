@@ -1,12 +1,16 @@
-import { Router } from 'express';
-import db from './database';
+import { Router, Request, Response, NextFunction } from 'express';
+import { User } from './models';
 import jwt from 'jsonwebtoken';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 
+interface AuthRequest extends Request {
+  user?: any;
+}
+
 // Middleware to protect routes
-const protectedRoute = (req, res, next) => {
+const protectedRoute = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const token = authHeader.split(' ')[1];
@@ -23,26 +27,32 @@ const protectedRoute = (req, res, next) => {
 };
 
 // Get user notification settings
-router.get('/', protectedRoute, (req, res) => {
-  const sql = 'SELECT notification_days FROM users WHERE id = ?';
-  db.get(sql, [req.user.id], (err, row: any) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error querying database' });
+router.get('/', protectedRoute, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.status(200).json({ notification_days: row?.notification_days || 7 });
-  });
+    res.status(200).json({ notification_days: user.notification_days || 7 });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching settings' });
+  }
 });
 
 // Update user notification settings
-router.put('/', protectedRoute, (req, res) => {
+router.put('/', protectedRoute, async (req: AuthRequest, res: Response) => {
   const { notification_days } = req.body;
-  const sql = 'UPDATE users SET notification_days = ? WHERE id = ?';
-  db.run(sql, [notification_days, req.user.id], function (err) {
-    if (err) {
-      return res.status(500).json({ message: 'Error updating settings' });
-    }
+  
+  try {
+    await User.update(
+      { notification_days },
+      { where: { id: req.user.id } }
+    );
+    
     res.status(200).json({ message: 'Settings updated successfully', notification_days });
-  });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating settings' });
+  }
 });
 
 export default router;

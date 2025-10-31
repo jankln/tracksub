@@ -1,92 +1,138 @@
 
-import { Router } from 'express';
-import db from './database';
+import { Router, Request, Response, NextFunction } from 'express';
+import { Subscription } from './models';
 import jwt from 'jsonwebtoken';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 
+interface AuthRequest extends Request {
+  user?: any;
+}
+
 // Middleware to protect routes
-const protectedRoute = (req, res, next) => {
+const protectedRoute = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const token = authHeader.split(' ')[1];
     jwt.verify(token, JWT_SECRET, (err, user) => {
       if (err) {
-        return res.sendStatus(403); // Forbidden
+        return res.sendStatus(403);
       }
       req.user = user;
       next();
     });
   } else {
-    res.sendStatus(401); // Unauthorized
+    res.sendStatus(401);
   }
 };
 
 // Get all subscriptions for a user
-router.get('/', protectedRoute, (req, res) => {
-  const sql = 'SELECT * FROM subscriptions WHERE user_id = ?';
-  db.all(sql, [req.user.id], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error querying database' });
-    }
-    res.status(200).json({ subscriptions: rows });
-  });
+router.get('/', protectedRoute, async (req: AuthRequest, res: Response) => {
+  try {
+    const subscriptions = await Subscription.findAll({
+      where: { user_id: req.user.id },
+      order: [['next_payment_date', 'ASC']]
+    });
+    res.status(200).json({ subscriptions });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching subscriptions' });
+  }
 });
 
 // Get a single subscription by ID
-router.get('/:id', protectedRoute, (req, res) => {
-  const sql = 'SELECT * FROM subscriptions WHERE id = ? AND user_id = ?';
-  db.get(sql, [req.params.id, req.user.id], (err, row) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error querying database' });
-    }
-    if (!row) {
+router.get('/:id', protectedRoute, async (req: AuthRequest, res: Response) => {
+  try {
+    const subscription = await Subscription.findOne({
+      where: { 
+        id: req.params.id,
+        user_id: req.user.id 
+      }
+    });
+    
+    if (!subscription) {
       return res.status(404).json({ message: 'Subscription not found' });
     }
-    res.status(200).json({ subscription: row });
-  });
+    
+    res.status(200).json({ subscription });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching subscription' });
+  }
 });
 
 // Create a new subscription
-router.post('/', protectedRoute, (req, res) => {
+router.post('/', protectedRoute, async (req: AuthRequest, res: Response) => {
   const { name, billing_cycle, start_date, next_payment_date, amount, category, status } = req.body;
-  const sql = 'INSERT INTO subscriptions (user_id, name, billing_cycle, start_date, next_payment_date, amount, category, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-  db.run(sql, [req.user.id, name, billing_cycle, start_date, next_payment_date, amount, category || 'Other', status || 'active'], function (err) {
-    if (err) {
-      return res.status(500).json({ message: 'Error creating subscription' });
-    }
-    res.status(201).json({ id: this.lastID });
-  });
+  
+  try {
+    const subscription = await Subscription.create({
+      user_id: req.user.id,
+      name,
+      billing_cycle,
+      start_date,
+      next_payment_date,
+      amount,
+      category: category || 'Other',
+      status: status || 'active'
+    });
+    
+    res.status(201).json({ id: subscription.id });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating subscription' });
+  }
 });
 
 // Update a subscription
-router.put('/:id', protectedRoute, (req, res) => {
+router.put('/:id', protectedRoute, async (req: AuthRequest, res: Response) => {
   const { name, billing_cycle, start_date, next_payment_date, amount, category, status } = req.body;
-  const sql = 'UPDATE subscriptions SET name = ?, billing_cycle = ?, start_date = ?, next_payment_date = ?, amount = ?, category = ?, status = ? WHERE id = ? AND user_id = ?';
-  db.run(sql, [name, billing_cycle, start_date, next_payment_date, amount, category || 'Other', status || 'active', req.params.id, req.user.id], function (err) {
-    if (err) {
-      return res.status(500).json({ message: 'Error updating subscription' });
-    }
-    if (this.changes === 0) {
+  
+  try {
+    const [updated] = await Subscription.update(
+      {
+        name,
+        billing_cycle,
+        start_date,
+        next_payment_date,
+        amount,
+        category: category || 'Other',
+        status: status || 'active'
+      },
+      {
+        where: { 
+          id: req.params.id,
+          user_id: req.user.id 
+        }
+      }
+    );
+    
+    if (updated === 0) {
       return res.status(404).json({ message: 'Subscription not found' });
     }
+    
     res.status(200).json({ message: 'Subscription updated' });
-  });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating subscription' });
+  }
 });
 
 // Delete a subscription
-router.delete('/:id', protectedRoute, (req, res) => {
-  const sql = 'DELETE FROM subscriptions WHERE id = ? AND user_id = ?';
-  db.run(sql, [req.params.id, req.user.id], function (err) {
-    if (err) {
-      return res.status(500).json({ message: 'Error deleting subscription' });
-    }
-    if (this.changes === 0) {
+router.delete('/:id', protectedRoute, async (req: AuthRequest, res: Response) => {
+  try {
+    const deleted = await Subscription.destroy({
+      where: { 
+        id: req.params.id,
+        user_id: req.user.id 
+      }
+    });
+    
+    if (deleted === 0) {
       return res.status(404).json({ message: 'Subscription not found' });
     }
+    
     res.status(200).json({ message: 'Subscription deleted' });
-  });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting subscription' });
+  }
 });
 
 export default router;

@@ -1,7 +1,7 @@
 
 import express from 'express';
 import path from 'path';
-import './database';
+import { initDatabase } from './models';
 import './notifications';
 import authRouter from './auth';
 import subscriptionsRouter from './subscriptions';
@@ -44,6 +44,15 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// Initialize database and start server
+initDatabase()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to initialize database:', error);
+    process.exit(1);
+  });
