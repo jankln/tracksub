@@ -1,31 +1,80 @@
-import React, { useMemo, useState } from 'react';
-import { Container, Row, Col, Card, Button, ListGroup, Alert, Badge } from 'react-bootstrap';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Container, Row, Col, Card, Button, ListGroup, Alert, Badge, Spinner } from 'react-bootstrap';
+import { useLocation } from 'react-router-dom';
 import { usePlan, usePlanCatalog } from '../context/PlanContext';
+import { createCheckoutSession, createFinancialConnectionsLink, createPortalSession } from '../api/billing';
 
 const currencySymbol = '€';
 
 const BillingPage = () => {
-  const { plan, currentPlan, isPro, markPendingUpgrade, completeUpgrade, downgradeToFree } = usePlan();
+  const { plan, currentPlan, isPro, refreshPlan, loading } = usePlan();
   const planCatalog = usePlanCatalog();
   const [upgrading, setUpgrading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [fcInfo, setFcInfo] = useState<string | null>(null);
+  const location = useLocation();
 
   const plans = useMemo(() => Object.values(planCatalog), [planCatalog]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('success') === '1') {
+      setMessage('Payment succeeded. Updating plan status…');
+      refreshPlan();
+    }
+    if (params.get('canceled') === '1') {
+      setError('Checkout canceled.');
+    }
+  }, [location.search, refreshPlan]);
+
+  useEffect(() => {
+    refreshPlan();
+  }, [refreshPlan]);
+
   const handleUpgrade = () => {
     setUpgrading(true);
-    markPendingUpgrade();
-    setMessage('Mock checkout created. When backend is connected, this will redirect to Stripe + Plaid.');
-    setTimeout(() => {
-      completeUpgrade(null);
-      setUpgrading(false);
-      setMessage('Tracksub Pro enabled locally. Backend hookup will control the real status.');
-    }, 800);
+    setError(null);
+    setMessage(null);
+    createCheckoutSession()
+      .then((data) => {
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          setError('No checkout URL returned from server.');
+        }
+      })
+      .catch((err) => {
+        setError('Failed to start checkout. Please try again.');
+        console.error(err);
+      })
+      .finally(() => setUpgrading(false));
   };
 
-  const handleDowngrade = () => {
-    downgradeToFree();
-    setMessage('Switched to Free. Billing backend will own this once connected.');
+  const handlePortal = () => {
+    createPortalSession()
+      .then((data) => {
+        if (data.url) {
+          window.location.href = data.url;
+        }
+      })
+      .catch((err) => {
+        setError('Failed to open billing portal.');
+        console.error(err);
+      });
+  };
+
+  const handleFinancialConnections = async () => {
+    setError(null);
+    setFcInfo(null);
+    try {
+      const data = await createFinancialConnectionsLink();
+      setFcInfo(`Link token created. Client secret: ${data.client_secret}`);
+      // When FC JS is wired, launch the modal here using client_secret.
+    } catch (err) {
+      setError('Failed to start Financial Connections.');
+      console.error(err);
+    }
   };
 
   return (
@@ -35,6 +84,16 @@ const BillingPage = () => {
         <Alert variant="info" className="mt-3" dismissible onClose={() => setMessage('')}>
           {message}
         </Alert>
+      )}
+      {error && (
+        <Alert variant="danger" className="mt-3" dismissible onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+      {loading && (
+        <div className="mt-2 d-flex align-items-center gap-2">
+          <Spinner animation="border" size="sm" /> <span className="text-muted">Loading plan…</span>
+        </div>
       )}
 
       <Row className="mt-4 g-3">
@@ -56,7 +115,7 @@ const BillingPage = () => {
                   <span>{planCatalog[currentPlan].includesManualEntry ? 'Included' : 'Not included'}</span>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between">
-                  <span>Plaid bank sync</span>
+                  <span>Plaid-powered payment</span>
                   <span>{planCatalog[currentPlan].includesPlaid ? 'Included' : 'Upgrade to unlock'}</span>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between">
@@ -70,8 +129,8 @@ const BillingPage = () => {
                     {upgrading ? 'Creating checkout…' : 'Upgrade to Pro'}
                   </Button>
                 ) : (
-                  <Button variant="outline-danger" onClick={handleDowngrade}>
-                    Downgrade to Free
+                  <Button variant="outline-secondary" onClick={handlePortal}>
+                    Manage in Stripe Portal
                   </Button>
                 )}
               </div>
@@ -83,14 +142,16 @@ const BillingPage = () => {
             <Card.Body>
               <Card.Title>Plaid connection (Pro)</Card.Title>
               <Card.Text className="text-muted">
-                This is the front-end shell for Plaid Link. Once the backend is ready,
-                this block will create a link token, open Plaid, and use it for secure
-                payment on the Pro subscription. Bank sync will be handled through Stripe.
+                This triggers Financial Connections (transactions) via Stripe. Once the Stripe
+                modal is wired, this button will open the secure bank chooser.
               </Card.Text>
               {isPro ? (
-                <Button variant="success" className="me-2" disabled>
-                  Launch Plaid Link for payment (coming soon)
-                </Button>
+                <>
+                  <Button variant="success" className="me-2" onClick={handleFinancialConnections}>
+                    Start Financial Connections
+                  </Button>
+                  {fcInfo && <Alert variant="secondary" className="mt-3 mb-0">{fcInfo}</Alert>}
+                </>
               ) : (
                 <Alert variant="secondary" className="mb-0">
                   Upgrade to Pro to enable Plaid-powered payment checkout.
@@ -133,11 +194,7 @@ const BillingPage = () => {
                   </ListGroup>
                   <div className="d-flex gap-2 mt-3">
                     {planOption.id === 'free' ? (
-                      <Button
-                        variant={active ? 'secondary' : 'outline-secondary'}
-                        onClick={handleDowngrade}
-                        disabled={active}
-                      >
+                      <Button variant={active ? 'secondary' : 'outline-secondary'} disabled>
                         {active ? 'Active' : 'Switch to Free'}
                       </Button>
                     ) : (

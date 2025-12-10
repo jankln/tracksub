@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { defaultPlanState, PlanId, PlanState, planCatalog, SubscriptionStatus } from '../types/plans';
+import { fetchPlan } from '../api/billing';
 
 interface PlanContextValue {
   plan: PlanState;
@@ -9,6 +10,8 @@ interface PlanContextValue {
   markPendingUpgrade: () => void;
   completeUpgrade: (renewalDate?: string | null) => void;
   downgradeToFree: () => void;
+  refreshPlan: () => Promise<void>;
+  loading: boolean;
 }
 
 const PlanContext = createContext<PlanContextValue | undefined>(undefined);
@@ -37,10 +40,21 @@ const persistToStorage = (state: PlanState) => {
 
 export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
   const [plan, setPlan] = useState<PlanState>(loadFromStorage);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     persistToStorage(plan);
   }, [plan]);
+
+  useEffect(() => {
+    const bootstrap = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      await refreshPlan();
+    };
+    bootstrap();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setLocalPlan = (planId: PlanId, status: SubscriptionStatus = 'active') => {
     setPlan({
@@ -78,6 +92,23 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const refreshPlan = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchPlan();
+      setPlan({
+        planId: (data.plan as PlanId) || 'free',
+        status: (data.subscription_status as SubscriptionStatus) || 'none',
+        renewsAt: null,
+        pendingUpgrade: false,
+      });
+    } catch (error) {
+      console.warn('Failed to load plan from backend, using local state');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       plan,
@@ -87,8 +118,10 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
       markPendingUpgrade,
       completeUpgrade,
       downgradeToFree,
+      refreshPlan,
+      loading,
     }),
-    [plan]
+    [plan, loading]
   );
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>;

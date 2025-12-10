@@ -1,31 +1,9 @@
 
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response } from 'express';
 import { Subscription } from './models';
-import jwt from 'jsonwebtoken';
+import { AuthRequest, protectedRoute } from './middleware/auth';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
-
-interface AuthRequest extends Request {
-  user?: any;
-}
-
-// Middleware to protect routes
-const protectedRoute = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
-      req.user = user;
-      next();
-    });
-  } else {
-    res.sendStatus(401);
-  }
-};
 
 // Get all subscriptions for a user
 router.get('/', protectedRoute, async (req: AuthRequest, res: Response) => {

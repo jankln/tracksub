@@ -23,9 +23,15 @@ interface UserAttributes {
   email: string;
   password: string;
   notification_days: number;
+  plan: string;
+  subscription_status: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  financial_account_id: string | null;
+  financial_session_id: string | null;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'notification_days'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'notification_days' | 'plan' | 'subscription_status' | 'stripe_customer_id' | 'stripe_subscription_id' | 'financial_account_id' | 'financial_session_id'> {}
 
 // Subscription model interfaces
 interface SubscriptionAttributes {
@@ -48,6 +54,12 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public email!: string;
   public password!: string;
   public notification_days!: number;
+  public plan!: string;
+  public subscription_status!: string;
+  public stripe_customer_id!: string | null;
+  public stripe_subscription_id!: string | null;
+  public financial_account_id!: string | null;
+  public financial_session_id!: string | null;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -72,6 +84,30 @@ User.init(
     notification_days: {
       type: DataTypes.INTEGER,
       defaultValue: 7,
+    },
+    plan: {
+      type: DataTypes.STRING,
+      defaultValue: 'free',
+    },
+    subscription_status: {
+      type: DataTypes.STRING,
+      defaultValue: 'none',
+    },
+    stripe_customer_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    stripe_subscription_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    financial_account_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    financial_session_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
@@ -159,10 +195,28 @@ export const initDatabase = async () => {
     console.log('Database connection established successfully.');
     
     // Sync models (create tables if they don't exist)
-    await sequelize.sync({ alter: false });
+    await sequelize.sync({ alter: true });
+    await ensureColumns();
     console.log('Database models synchronized.');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
     throw error;
   }
+};
+
+const ensureColumns = async () => {
+  const qi = sequelize.getQueryInterface();
+  const ensure = async (table: string, column: string, definition: any) => {
+    const desc = await qi.describeTable(table);
+    if (!desc[column]) {
+      await qi.addColumn(table, column, definition);
+    }
+  };
+
+  await ensure('users', 'plan', { type: DataTypes.STRING, defaultValue: 'free' });
+  await ensure('users', 'subscription_status', { type: DataTypes.STRING, defaultValue: 'none' });
+  await ensure('users', 'stripe_customer_id', { type: DataTypes.STRING, allowNull: true });
+  await ensure('users', 'stripe_subscription_id', { type: DataTypes.STRING, allowNull: true });
+  await ensure('users', 'financial_account_id', { type: DataTypes.STRING, allowNull: true });
+  await ensure('users', 'financial_session_id', { type: DataTypes.STRING, allowNull: true });
 };

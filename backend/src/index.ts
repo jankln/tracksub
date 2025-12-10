@@ -6,16 +6,23 @@ import './notifications';
 import authRouter from './auth';
 import subscriptionsRouter from './subscriptions';
 import settingsRouter from './settings';
+import billingRouter from './billing';
+import { stripeWebhookHandler } from './stripeWebhook';
 import { checkAndSendNotifications } from './notifications';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Stripe webhook needs raw body for signature verification
+app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookHandler);
+
+// All other routes use JSON parsing
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/billing', billingRouter);
 
 // Debug endpoint to check subscriptions and dates
 app.get('/api/notifications/debug', async (req, res) => {
