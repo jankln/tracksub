@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js';
 import { Pie, Bar, Line } from 'react-chartjs-2';
 import { getCategoryColor } from '../categories';
+import { usePlan } from '../context/PlanContext';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
 
@@ -20,6 +21,7 @@ interface Subscription {
 }
 
 const HomePage = () => {
+  const { isPro } = usePlan();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -260,6 +262,21 @@ const HomePage = () => {
   return (
     <Container className="mt-4">
       <h1>Dashboard</h1>
+      {!isPro && (
+        <Alert
+          variant="dark"
+          className="mt-3 d-flex justify-content-between align-items-center"
+          style={{ border: '1px solid rgba(99, 102, 241, 0.4)' }}
+        >
+          <div>
+            <div className="fw-bold">New: Plaid-powered sync in Tracksub Pro</div>
+            <div className="text-muted small">Keep manual entry free. Upgrade for automated bank imports.</div>
+          </div>
+          <Link to="/billing">
+            <Button variant="primary">Upgrade to Pro</Button>
+          </Link>
+        </Alert>
+      )}
       
       {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
 

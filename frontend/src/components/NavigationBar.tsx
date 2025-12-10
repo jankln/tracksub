@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import PlanBadge from './PlanBadge';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -45,25 +46,31 @@ const NavigationBar = () => {
                 <Nav.Link as={Link} to="/" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Dashboard</Nav.Link>
                 <Nav.Link as={Link} to="/subscriptions" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Subscriptions</Nav.Link>
                 <Nav.Link as={Link} to="/add-subscription" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Add Subscription</Nav.Link>
+                <Nav.Link as={Link} to="/billing" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Billing</Nav.Link>
                 <Nav.Link as={Link} to="/settings" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Settings</Nav.Link>
               </>
             )}
           </Nav>
           <Nav>
             {token ? (
-              <Button 
-                onClick={handleLogout}
-                style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: '#fca5a5',
-                  borderRadius: '10px',
-                  padding: '0.5rem 1.5rem',
-                  fontWeight: '600'
-                }}
-              >
-                Logout
-              </Button>
+              <>
+                <div className="me-3 d-flex align-items-center">
+                  <PlanBadge />
+                </div>
+                <Button 
+                  onClick={handleLogout}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#fca5a5',
+                    borderRadius: '10px',
+                    padding: '0.5rem 1.5rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
             ) : (
               <>
                 <Nav.Link as={Link} to="/login" style={{ color: '#e2e8f0', fontWeight: '500' }}>Login</Nav.Link>

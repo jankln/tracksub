@@ -4,13 +4,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { PlanProvider } from './context/PlanContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <PlanProvider>
+      <App />
+    </PlanProvider>
   </React.StrictMode>
 );
 
