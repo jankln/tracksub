@@ -78,7 +78,8 @@ export const stripeWebhookHandler = async (req: Request, res: Response) => {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
-        await updateUserStatus(customerId, 'past_due', invoice.subscription as string);
+        const subscriptionId = invoice.parent?.subscription_details?.subscription as string | undefined;
+        await updateUserStatus(customerId, 'past_due', subscriptionId);
         break;
       }
       default:
