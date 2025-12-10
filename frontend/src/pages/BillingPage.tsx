@@ -84,16 +84,16 @@ const BillingPage = () => {
               <Card.Title>Plaid connection (Pro)</Card.Title>
               <Card.Text className="text-muted">
                 This is the front-end shell for Plaid Link. Once the backend is ready,
-                this block will create a link token, open Plaid, and attach the item to the
-                customer&apos;s Pro subscription.
+                this block will create a link token, open Plaid, and use it for secure
+                payment on the Pro subscription. Bank sync will be handled through Stripe.
               </Card.Text>
               {isPro ? (
                 <Button variant="success" className="me-2" disabled>
-                  Launch Plaid Link (coming soon)
+                  Launch Plaid Link for payment (coming soon)
                 </Button>
               ) : (
                 <Alert variant="secondary" className="mb-0">
-                  Upgrade to Pro to enable Plaid-powered sync.
+                  Upgrade to Pro to enable Plaid-powered payment checkout.
                 </Alert>
               )}
             </Card.Body>

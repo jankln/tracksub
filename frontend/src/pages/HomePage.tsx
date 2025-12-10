@@ -269,8 +269,8 @@ const HomePage = () => {
           style={{ border: '1px solid rgba(99, 102, 241, 0.4)' }}
         >
           <div>
-            <div className="fw-bold">New: Plaid-powered sync in Tracksub Pro</div>
-            <div className="text-muted small">Keep manual entry free. Upgrade for automated bank imports.</div>
+            <div className="fw-bold">New: Plaid-powered payments in Tracksub Pro</div>
+            <div className="text-muted small">Keep manual entry free. Upgrade for Pro checkout; bank sync via Stripe is coming.</div>
           </div>
           <Link to="/billing">
             <Button variant="primary">Upgrade to Pro</Button>
