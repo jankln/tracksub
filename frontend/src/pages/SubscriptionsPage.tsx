@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import { Container, Card, ListGroup, Badge, Button, Form, Row, Col, Alert, Spinner, Modal } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { getCategoryColor, CATEGORIES } from '../categories';
 import { useLanguage } from '../context/LanguageContext';
 
