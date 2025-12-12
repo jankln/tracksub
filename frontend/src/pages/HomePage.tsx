@@ -274,7 +274,7 @@ const HomePage = () => {
           style={{ border: '1px solid rgba(99, 102, 241, 0.4)' }}
         >
           <div>
-            <div className="fw-bold">New: Plaid-powered payments in Tracksub Pro</div>
+            <div className="fw-bold">Tracksub Pro: automatic bank sync</div>
             <div className="text-muted small">{t('dashboard_banner')}</div>
           </div>
           <Link to="/billing">

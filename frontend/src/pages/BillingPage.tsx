@@ -102,7 +102,7 @@ const BillingPage = () => {
                   <span>{planCatalog[currentPlan].includesManualEntry ? 'Included' : 'Not included'}</span>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between">
-                  <span>Plaid-powered payment</span>
+                  <span>Automatic bank sync</span>
                   <span>{planCatalog[currentPlan].includesPlaid ? 'Included' : 'Upgrade to unlock'}</span>
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex justify-content-between">
@@ -129,7 +129,7 @@ const BillingPage = () => {
             <Card.Body>
               <Card.Title>Bank Sync (Pro)</Card.Title>
               <Card.Text className="text-muted">
-                Manage bank connections and subscription syncing from the dedicated Bank Sync tab.
+                Connect once, then new subscriptions from your bank are pulled in automatically. Manual entry stays available too.
               </Card.Text>
               <Button variant="outline-primary" onClick={() => navigate('/bank-sync')}>
                 Go to Bank Sync

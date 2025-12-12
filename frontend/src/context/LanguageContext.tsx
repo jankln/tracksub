@@ -49,7 +49,7 @@ const translationMap: Record<LanguageCode, Translations> = {
     status_cancelled: 'Cancelled',
 
     dashboard_title: 'Dashboard',
-    dashboard_banner: 'Keep manual entry free. Upgrade for Pro checkout; bank sync via Stripe is coming.',
+    dashboard_banner: 'Connect your bank once and we auto-fetch new subscriptions. Manual entry stays free; Pro adds faster support.',
     dashboard_monthly_cost: 'Monthly Cost',
     dashboard_yearly_cost: 'Yearly Cost',
     dashboard_active: 'Active',
