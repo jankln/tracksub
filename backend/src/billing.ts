@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import Stripe from 'stripe';
 import { AuthRequest, protectedRoute } from './middleware/auth';
-import { User } from './models';
+import { FinancialTransaction, User } from './models';
 
 const router = Router();
 
@@ -140,6 +140,77 @@ router.post('/financial-connections/attach', protectedRoute, async (req: AuthReq
     res.json({ message: 'Financial account saved' });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to save financial account', error: error.message });
+  }
+});
+
+router.post('/financial-connections/sync', protectedRoute, async (req: AuthRequest, res) => {
+  if (!ensureStripe(res)) return;
+  try {
+    const user = await fetchUser(req.user!.id);
+
+    if (user.plan !== 'pro') {
+      return res.status(403).json({ message: 'Financial Connections sync is available for Pro users only.' });
+    }
+
+    if (!user.financial_account_id) {
+      return res.status(400).json({ message: 'No financial account linked to this user.' });
+    }
+
+    const now = new Date();
+    const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    let syncCount = user.financial_sync_count || 0;
+    let syncMonth = user.financial_sync_month;
+    if (syncMonth !== monthKey) {
+      syncMonth = monthKey;
+      syncCount = 0;
+    }
+    if (syncCount >= 2) {
+      return res.status(429).json({ message: 'Sync limit reached. You can sync up to 2 times per month.' });
+    }
+
+    // Refresh transactions to ensure we get latest data
+    await stripe!.financialConnections.accounts.refresh(user.financial_account_id, { features: ['transactions'] });
+
+    const since = user.financial_last_sync_at ? Math.floor(new Date(user.financial_last_sync_at).getTime() / 1000) : undefined;
+    const listParams: Stripe.FinancialConnections.TransactionListParams = {
+      account: user.financial_account_id,
+      limit: 100,
+    };
+    if (since) {
+      listParams.transacted_at = { gt: since };
+    }
+
+    let newTransactions = 0;
+    let latestTransacted = since || 0;
+
+    const pager = stripe!.financialConnections.transactions.list(listParams);
+    for await (const tx of pager.autoPagingEach()) {
+      const existing = await FinancialTransaction.findOne({ where: { transaction_id: tx.id } });
+      if (existing) continue;
+      await FinancialTransaction.create({
+        user_id: user.id,
+        account_id: tx.account,
+        transaction_id: tx.id,
+        amount: tx.amount,
+        currency: tx.currency,
+        description: tx.description,
+        status: tx.status,
+        transacted_at: new Date(tx.transacted_at * 1000).toISOString(),
+      });
+      newTransactions += 1;
+      latestTransacted = Math.max(latestTransacted, tx.transacted_at);
+    }
+
+    await user.update({
+      financial_sync_month: syncMonth,
+      financial_sync_count: syncCount + 1,
+      financial_last_sync_at: latestTransacted ? new Date(latestTransacted * 1000).toISOString() : user.financial_last_sync_at,
+    });
+
+    res.json({ message: 'Sync completed', new_transactions: newTransactions });
+  } catch (error: any) {
+    console.error('Financial Connections sync error', error);
+    res.status(500).json({ message: 'Failed to sync financial connections', error: error.message });
   }
 });
 

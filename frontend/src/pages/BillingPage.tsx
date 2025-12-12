@@ -1,8 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Container, Row, Col, Card, Button, ListGroup, Alert, Badge, Spinner } from 'react-bootstrap';
 import { useLocation } from 'react-router-dom';
 import { usePlan, usePlanCatalog } from '../context/PlanContext';
-import { createCheckoutSession, createFinancialConnectionsLink, createPortalSession } from '../api/billing';
+import {
+  attachFinancialConnectionsAccount,
+  createCheckoutSession,
+  createFinancialConnectionsLink,
+  createPortalSession,
+} from '../api/billing';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 
 const currencySymbol = '€';
 
@@ -13,7 +19,9 @@ const BillingPage = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fcInfo, setFcInfo] = useState<string | null>(null);
+  const [fcLoading, setFcLoading] = useState(false);
   const location = useLocation();
+  const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
 
   const plans = useMemo(() => Object.values(planCatalog), [planCatalog]);
 
@@ -67,13 +75,48 @@ const BillingPage = () => {
   const handleFinancialConnections = async () => {
     setError(null);
     setFcInfo(null);
+    setFcLoading(true);
     try {
+      const publishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
+      if (!publishableKey) {
+        throw new Error('Stripe publishable key is not configured.');
+      }
+
+      if (!stripePromiseRef.current) {
+        stripePromiseRef.current = loadStripe(publishableKey);
+      }
+      const stripe = await stripePromiseRef.current;
+      if (!stripe) {
+        throw new Error('Failed to initialize Stripe.js.');
+      }
+
       const data = await createFinancialConnectionsLink();
-      setFcInfo(`Link token created. Client secret: ${data.client_secret}`);
-      // When FC JS is wired, launch the modal here using client_secret.
+      if (!data?.client_secret) {
+        throw new Error('No client secret returned from server.');
+      }
+
+      const result = await stripe.collectFinancialConnectionsAccounts({
+        clientSecret: data.client_secret,
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message || 'Stripe returned an error starting Financial Connections.');
+      }
+
+      const session = result.financialConnectionsSession;
+      const accountId = session?.accounts?.[0]?.id;
+      if (!session?.id || !accountId) {
+        throw new Error('No account returned from Financial Connections.');
+      }
+
+      await attachFinancialConnectionsAccount(accountId, session.id);
+      setFcInfo('Bank account linked successfully.');
     } catch (err) {
-      setError('Failed to start Financial Connections.');
+      const message = err instanceof Error ? err.message : 'Failed to start Financial Connections.';
+      setError(message);
       console.error(err);
+    } finally {
+      setFcLoading(false);
     }
   };
 
@@ -147,8 +190,8 @@ const BillingPage = () => {
               </Card.Text>
               {isPro ? (
                 <>
-                  <Button variant="success" className="me-2" onClick={handleFinancialConnections}>
-                    Start Financial Connections
+                  <Button variant="success" className="me-2" onClick={handleFinancialConnections} disabled={fcLoading}>
+                    {fcLoading ? 'Startingƒ?İ' : 'Start Financial Connections'}
                   </Button>
                   {fcInfo && <Alert variant="secondary" className="mt-3 mb-0">{fcInfo}</Alert>}
                 </>

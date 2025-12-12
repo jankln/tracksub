@@ -29,9 +29,26 @@ interface UserAttributes {
   stripe_subscription_id: string | null;
   financial_account_id: string | null;
   financial_session_id: string | null;
+  financial_sync_month: string | null;
+  financial_sync_count: number;
+  financial_last_sync_at: string | null;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'notification_days' | 'plan' | 'subscription_status' | 'stripe_customer_id' | 'stripe_subscription_id' | 'financial_account_id' | 'financial_session_id'> {}
+interface UserCreationAttributes
+  extends Optional<
+    UserAttributes,
+    | 'id'
+    | 'notification_days'
+    | 'plan'
+    | 'subscription_status'
+    | 'stripe_customer_id'
+    | 'stripe_subscription_id'
+    | 'financial_account_id'
+    | 'financial_session_id'
+    | 'financial_sync_month'
+    | 'financial_sync_count'
+    | 'financial_last_sync_at'
+  > {}
 
 // Subscription model interfaces
 interface SubscriptionAttributes {
@@ -60,6 +77,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public stripe_subscription_id!: string | null;
   public financial_account_id!: string | null;
   public financial_session_id!: string | null;
+  public financial_sync_month!: string | null;
+  public financial_sync_count!: number;
+  public financial_last_sync_at!: string | null;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -106,6 +126,19 @@ User.init(
       allowNull: true,
     },
     financial_session_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    financial_sync_month: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    financial_sync_count: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    financial_last_sync_at: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -184,9 +217,91 @@ Subscription.init(
   }
 );
 
+// Financial Transactions model
+interface FinancialTransactionAttributes {
+  id: number;
+  user_id: number;
+  account_id: string;
+  transaction_id: string;
+  amount: number;
+  currency: string;
+  description: string;
+  status: string;
+  transacted_at: string;
+}
+
+interface FinancialTransactionCreationAttributes
+  extends Optional<FinancialTransactionAttributes, 'id'> {}
+
+export class FinancialTransaction
+  extends Model<FinancialTransactionAttributes, FinancialTransactionCreationAttributes>
+  implements FinancialTransactionAttributes
+{
+  public id!: number;
+  public user_id!: number;
+  public account_id!: string;
+  public transaction_id!: string;
+  public amount!: number;
+  public currency!: string;
+  public description!: string;
+  public status!: string;
+  public transacted_at!: string;
+}
+
+FinancialTransaction.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'users', key: 'id' },
+    },
+    account_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    transaction_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    amount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    currency: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    transacted_at: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize,
+    tableName: 'financial_transactions',
+    timestamps: false,
+  }
+);
+
 // Define associations
 User.hasMany(Subscription, { foreignKey: 'user_id' });
 Subscription.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(FinancialTransaction, { foreignKey: 'user_id' });
+FinancialTransaction.belongsTo(User, { foreignKey: 'user_id' });
 
 // Initialize database
 export const initDatabase = async () => {
@@ -219,4 +334,7 @@ const ensureColumns = async () => {
   await ensure('users', 'stripe_subscription_id', { type: DataTypes.STRING, allowNull: true });
   await ensure('users', 'financial_account_id', { type: DataTypes.STRING, allowNull: true });
   await ensure('users', 'financial_session_id', { type: DataTypes.STRING, allowNull: true });
+  await ensure('users', 'financial_sync_month', { type: DataTypes.STRING, allowNull: true });
+  await ensure('users', 'financial_sync_count', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
+  await ensure('users', 'financial_last_sync_at', { type: DataTypes.STRING, allowNull: true });
 };
