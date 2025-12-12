@@ -228,10 +228,11 @@ interface FinancialTransactionAttributes {
   description: string;
   status: string;
   transacted_at: string;
+  linked_subscription_id: number | null;
 }
 
 interface FinancialTransactionCreationAttributes
-  extends Optional<FinancialTransactionAttributes, 'id'> {}
+  extends Optional<FinancialTransactionAttributes, 'id' | 'linked_subscription_id'> {}
 
 export class FinancialTransaction
   extends Model<FinancialTransactionAttributes, FinancialTransactionCreationAttributes>
@@ -246,6 +247,7 @@ export class FinancialTransaction
   public description!: string;
   public status!: string;
   public transacted_at!: string;
+  public linked_subscription_id!: number | null;
 }
 
 FinancialTransaction.init(
@@ -288,6 +290,10 @@ FinancialTransaction.init(
     transacted_at: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    linked_subscription_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {
@@ -337,4 +343,6 @@ const ensureColumns = async () => {
   await ensure('users', 'financial_sync_month', { type: DataTypes.STRING, allowNull: true });
   await ensure('users', 'financial_sync_count', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
   await ensure('users', 'financial_last_sync_at', { type: DataTypes.STRING, allowNull: true });
+
+  await ensure('financial_transactions', 'linked_subscription_id', { type: DataTypes.INTEGER, allowNull: true });
 };

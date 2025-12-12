@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import Stripe from 'stripe';
 import { AuthRequest, protectedRoute } from './middleware/auth';
-import { FinancialTransaction, User } from './models';
+import { FinancialTransaction, Subscription, User } from './models';
 
 const router = Router();
 
@@ -140,6 +140,98 @@ router.post('/financial-connections/attach', protectedRoute, async (req: AuthReq
     res.json({ message: 'Financial account saved' });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to save financial account', error: error.message });
+  }
+});
+
+const buildSubscriptionCandidates = async (user: User) => {
+  const existingSubscriptions = await Subscription.findAll({ where: { user_id: user.id } });
+  const existingNames = new Set(existingSubscriptions.map((s) => s.name.toLowerCase()));
+
+  const transactions = await FinancialTransaction.findAll({
+    where: { user_id: user.id, linked_subscription_id: null },
+    order: [['transacted_at', 'DESC']],
+    limit: 100,
+  });
+
+  return transactions
+    .filter((tx) => tx.description)
+    .filter((tx) => !existingNames.has(tx.description.toLowerCase()))
+    .map((tx) => ({
+      transaction_id: tx.transaction_id,
+      description: tx.description,
+      amount: Math.abs(tx.amount) / 100,
+      currency: tx.currency,
+      transacted_at: tx.transacted_at,
+      suggested_name: tx.description,
+      suggested_billing_cycle: 'monthly',
+      suggested_next_payment_date: tx.transacted_at.slice(0, 10),
+    }));
+};
+
+router.get('/financial-connections/candidates', protectedRoute, async (req: AuthRequest, res) => {
+  try {
+    const user = await fetchUser(req.user!.id);
+    if (user.plan !== 'pro') {
+      return res.status(403).json({ message: 'Available for Pro users only.' });
+    }
+    if (!user.financial_account_id) {
+      return res.status(400).json({ message: 'No linked financial account.' });
+    }
+    const candidates = await buildSubscriptionCandidates(user);
+    res.json({ candidates });
+  } catch (error: any) {
+    console.error('Financial Connections candidate error', error);
+    res.status(500).json({ message: 'Failed to load candidates', error: error.message });
+  }
+});
+
+router.post('/financial-connections/import', protectedRoute, async (req: AuthRequest, res) => {
+  try {
+    const user = await fetchUser(req.user!.id);
+    if (user.plan !== 'pro') {
+      return res.status(403).json({ message: 'Available for Pro users only.' });
+    }
+    const items = Array.isArray(req.body?.subscriptions) ? req.body.subscriptions : [];
+    if (!items.length) {
+      return res.status(400).json({ message: 'No subscriptions provided.' });
+    }
+    const created: Array<{ id: number; transaction_id: string }> = [];
+    for (const item of items) {
+      const {
+        transaction_id,
+        name,
+        billing_cycle,
+        next_payment_date,
+        amount,
+        category = 'Other',
+      } = item;
+      if (!transaction_id || !name || !billing_cycle || !next_payment_date || amount === undefined) {
+        continue;
+      }
+      const tx = await FinancialTransaction.findOne({
+        where: { transaction_id, user_id: user.id, linked_subscription_id: null },
+      });
+      if (!tx) continue;
+
+      const subscription = await Subscription.create({
+        user_id: user.id,
+        name,
+        billing_cycle,
+        start_date: next_payment_date,
+        next_payment_date,
+        amount: parseFloat(String(amount)),
+        category,
+        status: 'active',
+      });
+
+      await tx.update({ linked_subscription_id: subscription.id });
+      created.push({ id: subscription.id, transaction_id });
+    }
+
+    res.json({ created });
+  } catch (error: any) {
+    console.error('Financial Connections import error', error);
+    res.status(500).json({ message: 'Failed to import subscriptions', error: error.message });
   }
 });
 

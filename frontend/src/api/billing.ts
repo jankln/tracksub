@@ -30,3 +30,18 @@ export const attachFinancialConnectionsAccount = async (accountId: string, sessi
   });
   return res.data;
 };
+
+export const syncFinancialConnections = async () => {
+  const res = await api.post('/billing/financial-connections/sync');
+  return res.data;
+};
+
+export const fetchFinancialCandidates = async () => {
+  const res = await api.get('/billing/financial-connections/candidates');
+  return res.data;
+};
+
+export const importFinancialSubscriptions = async (subscriptions: any[]) => {
+  const res = await api.post('/billing/financial-connections/import', { subscriptions });
+  return res.data;
+};
