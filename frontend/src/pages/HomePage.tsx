@@ -67,7 +67,9 @@ const HomePage = () => {
     labels: subscriptions.map(sub => sub.name),
     datasets: [
       {
-        data: subscriptions.map(sub => sub.amount),
+        data: subscriptions.map(sub => {
+          return sub.billing_cycle === 'yearly' ? sub.amount / 12 : sub.amount;
+        }),
         backgroundColor: [
           '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981',
           '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981'
@@ -105,16 +107,16 @@ const HomePage = () => {
     .filter(sub => sub.billing_cycle === 'monthly')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
-  const yearlyMonthlyEquivalent = subscriptions
+  const yearlyTotal = subscriptions
     .filter(sub => sub.billing_cycle === 'yearly')
-    .reduce((sum, sub) => sum + sub.amount / 12, 0);
+    .reduce((sum, sub) => sum + sub.amount, 0);
 
   const barChartData = {
     labels: [t('dashboard_label_monthly'), t('dashboard_label_yearly')],
     datasets: [
       {
         label: t('dashboard_bar_label'),
-        data: [monthlyTotal, yearlyMonthlyEquivalent],
+        data: [monthlyTotal, yearlyTotal],
         backgroundColor: ['#6366f1', '#8b5cf6'],
         borderWidth: 2,
         borderColor: 'rgba(15, 23, 42, 0.8)',
