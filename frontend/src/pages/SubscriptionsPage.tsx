@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import { Container, Card, ListGroup, Badge, Button, Form, Row, Col, Alert, Spinner, Modal } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import { getCategoryColor, CATEGORIES } from '../categories';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Subscription {
   id: number;
@@ -16,6 +16,7 @@ interface Subscription {
 }
 
 const SubscriptionsPage = () => {
+  const { t } = useLanguage();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [filteredSubscriptions, setFilteredSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,8 +173,8 @@ const SubscriptionsPage = () => {
   return (
     <Container className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Manage Subscriptions</h1>
-        <Button variant="primary" onClick={() => setShowAddModal(true)}>Add Subscription</Button>
+        <h1>{t('subscriptions_manage_title')}</h1>
+        <Button variant="primary" onClick={() => setShowAddModal(true)}>{t('subscriptions_add')}</Button>
       </div>
 
       {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
@@ -183,7 +184,7 @@ const SubscriptionsPage = () => {
           <Row>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Filter by Category</Form.Label>
+                <Form.Label>{t('subscriptions_filter_category')}</Form.Label>
                 <Form.Control
                   as="select"
                   value={categoryFilter}
@@ -198,7 +199,7 @@ const SubscriptionsPage = () => {
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Filter by Status</Form.Label>
+                <Form.Label>{t('subscriptions_filter_status')}</Form.Label>
                 <Form.Control
                   as="select"
                   value={statusFilter}
@@ -219,15 +220,15 @@ const SubscriptionsPage = () => {
         <Card>
           <Card.Body className="text-center py-5">
             <div style={{ fontSize: '4rem', opacity: 0.3 }}>🔍</div>
-            <h4 className="mt-3">No Subscriptions Found</h4>
+            <h4 className="mt-3">{t('subscriptions_none_title')}</h4>
             <p className="text-muted">
               {subscriptions.length === 0 
-                ? 'Start by adding your first subscription'
-                : 'Try adjusting your filters'}
+                ? t('subscriptions_none_desc_first')
+                : t('subscriptions_none_desc_filter')}
             </p>
             {subscriptions.length === 0 && (
               <Button variant="primary" size="lg" className="mt-2" onClick={() => setShowAddModal(true)}>
-                Add Subscription
+                {t('subscriptions_add')}
               </Button>
             )}
           </Card.Body>
@@ -305,17 +306,17 @@ const SubscriptionsPage = () => {
 
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
+          <Modal.Title>{t('subscriptions_delete_confirm_title')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete this subscription? This action cannot be undone.
+          {t('subscriptions_delete_confirm_body')}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button variant="danger" onClick={handleDeleteConfirm}>
-            Delete
+            {t('delete')}
           </Button>
         </Modal.Footer>
       </Modal>

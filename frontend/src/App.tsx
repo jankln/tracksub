@@ -12,6 +12,7 @@ import SubscriptionsPage from './pages/SubscriptionsPage';
 import SettingsPage from './pages/SettingsPage';
 import BillingPage from './pages/BillingPage';
 import BankSyncPage from './pages/BankSyncPage';
+import { LanguageProvider } from './context/LanguageContext';
 
 function App() {
   const isAuthenticated = () => {
@@ -27,87 +28,89 @@ function App() {
   };
 
   return (
-    <Router>
-      {isAuthenticated() && <NavigationBar />}
-      <Routes>
-        <Route
-          path="/welcome"
-          element={
-            <PublicRoute>
-              <WelcomePage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <RegisterPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            isAuthenticated() ? (
+    <LanguageProvider>
+      <Router>
+        {isAuthenticated() && <NavigationBar />}
+        <Routes>
+          <Route
+            path="/welcome"
+            element={
+              <PublicRoute>
+                <WelcomePage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <RegisterPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              isAuthenticated() ? (
+                <PrivateRoute>
+                  <HomePage />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/welcome" />
+              )
+            }
+          />
+          <Route
+            path="/edit-subscription/:id"
+            element={
               <PrivateRoute>
-                <HomePage />
+                <EditSubscriptionPage />
               </PrivateRoute>
-            ) : (
-              <Navigate to="/welcome" />
-            )
-          }
-        />
-        <Route
-          path="/edit-subscription/:id"
-          element={
-            <PrivateRoute>
-              <EditSubscriptionPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/subscriptions"
-          element={
-            <PrivateRoute>
-              <SubscriptionsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <PrivateRoute>
-              <SettingsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/billing"
-          element={
-            <PrivateRoute>
-              <BillingPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/bank-sync"
-          element={
-            <PrivateRoute>
-              <BankSyncPage />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </Router>
+            }
+          />
+          <Route
+            path="/subscriptions"
+            element={
+              <PrivateRoute>
+                <SubscriptionsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute>
+                <SettingsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/billing"
+            element={
+              <PrivateRoute>
+                <BillingPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/bank-sync"
+            element={
+              <PrivateRoute>
+                <BankSyncPage />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 }
 

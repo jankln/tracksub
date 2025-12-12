@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { Container, Card, Form, Button, Alert, Tabs, Tab } from 'react-bootstrap';
+import { useLanguage } from '../context/LanguageContext';
 
 const SettingsPage = () => {
+  const { language, setLanguage, t } = useLanguage();
   const [notificationDays, setNotificationDays] = useState(1);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [language, setLanguage] = useState<string>(() => localStorage.getItem('language') || 'en');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -58,7 +59,7 @@ const SettingsPage = () => {
 
   return (
     <Container className="mt-4">
-      <h1>Settings</h1>
+      <h1>{t('settings_title')}</h1>
       
       {message && <Alert variant="success" dismissible onClose={() => setMessage('')}>{message}</Alert>}
       {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
@@ -66,9 +67,9 @@ const SettingsPage = () => {
       <Card className="mt-4">
         <Card.Body>
           <Tabs defaultActiveKey="notifications" id="settings-tabs" className="mb-3">
-            <Tab eventKey="notifications" title="Notifications">
-              <Card.Title>Email Notifications</Card.Title>
-              <Card.Text>Get reminded before your subscription payments are due.</Card.Text>
+            <Tab eventKey="notifications" title={t('settings_tab_notifications')}>
+              <Card.Title>{t('settings_email_title')}</Card.Title>
+              <Card.Text>{t('settings_email_help')}</Card.Text>
               
               {localStorage.getItem('userEmail') ? (
                 <Card.Text>
@@ -76,15 +77,15 @@ const SettingsPage = () => {
                 </Card.Text>
               ) : (
                 <Alert variant="warning">
-                  <strong>⚠️ No email set</strong><br/>
-                  Please logout and login again to set your email for notifications.
+                  <strong>⚠️</strong><br/>
+                  {t('settings_no_email')}
                 </Alert>
               )}
               
               <hr />
               
               <Form.Group controlId="notificationDays" className="mb-3">
-                <Form.Label><strong>Reminder Timing</strong></Form.Label>
+                <Form.Label><strong>{t('settings_reminder_timing')}</strong></Form.Label>
                 <div className="mb-3">
                   <div className="d-flex gap-2 flex-wrap mb-2">
                     {[1, 3, 7, 14, 30].map((days) => (
@@ -99,7 +100,7 @@ const SettingsPage = () => {
                     ))}
                   </div>
                   
-                  <Form.Label className="mt-2">Or enter custom days:</Form.Label>
+                  <Form.Label className="mt-2">{t('settings_custom_days')}</Form.Label>
                   <Form.Control
                     type="number"
                     min="1"
@@ -111,34 +112,34 @@ const SettingsPage = () => {
                 </div>
                 <Alert variant="info" className="mb-0">
                   <small>
-                    📅 You'll receive an email <strong>{notificationDays} day{notificationDays !== 1 ? 's' : ''}</strong> before each payment is due.
+                    📅 {t('settings_info_prefix')} <strong>{notificationDays} day{notificationDays !== 1 ? 's' : ''}</strong> before each payment is due.
                   </small>
                 </Alert>
               </Form.Group>
               
               <Button variant="primary" onClick={handleSaveNotifications} className="me-2">
-                Save notification settings
+                {t('settings_save_notifications')}
               </Button>
               
               <Button variant="secondary" onClick={handleTestNotification}>
-                Send test notification
+                {t('settings_send_test')}
               </Button>
             </Tab>
-            <Tab eventKey="language" title="Language">
-              <Card.Title className="mt-3">Language</Card.Title>
+            <Tab eventKey="language" title={t('settings_tab_language')}>
+              <Card.Title className="mt-3">{t('settings_tab_language')}</Card.Title>
               <Form.Group controlId="languageSelect" className="mb-3">
-                <Form.Label>Select your language</Form.Label>
-                <Form.Select value={language} onChange={(e) => setLanguage(e.target.value)}>
+                <Form.Label>{t('settings_language_label')}</Form.Label>
+                <Form.Select value={language} onChange={(e) => setLanguage(e.target.value as any)}>
                   <option value="en">English</option>
                   <option value="de">Deutsch</option>
                   <option value="fr">Français</option>
                 </Form.Select>
               </Form.Group>
               <Button variant="primary" onClick={handleLanguageSave}>
-                Save language
+                {t('settings_language_save')}
               </Button>
               <Alert variant="secondary" className="mt-3">
-                <small>Language is stored locally for now.</small>
+                <small>{t('settings_language_note')}</small>
               </Alert>
             </Tab>
           </Tabs>
