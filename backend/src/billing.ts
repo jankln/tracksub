@@ -184,7 +184,7 @@ router.post('/financial-connections/sync', protectedRoute, async (req: AuthReque
     let latestTransacted = since || 0;
 
     const pager = stripe!.financialConnections.transactions.list(listParams);
-    for await (const tx of pager.autoPagingEach()) {
+    for await (const tx of pager) {
       const existing = await FinancialTransaction.findOne({ where: { transaction_id: tx.id } });
       if (existing) continue;
       await FinancialTransaction.create({
