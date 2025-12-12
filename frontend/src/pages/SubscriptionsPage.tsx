@@ -191,7 +191,7 @@ const SubscriptionsPage = () => {
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
                 >
-                  <option value="all">All Categories</option>
+                  <option value="all">{t('subscriptions_all_categories')}</option>
                   {CATEGORIES.map(cat => (
                     <option key={cat.value} value={cat.value}>{cat.label}</option>
                   ))}
@@ -206,10 +206,10 @@ const SubscriptionsPage = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="all">{t('subscriptions_all_status')}</option>
+                  <option value="active">{t('status_active')}</option>
+                  <option value="inactive">{t('status_inactive')}</option>
+                  <option value="cancelled">{t('status_cancelled')}</option>
                 </Form.Control>
               </Form.Group>
             </Col>
@@ -248,6 +248,7 @@ const SubscriptionsPage = () => {
             };
             const statusColor = getStatusColor();
             const age = calculateAge(sub.start_date);
+            const statusLabel = t(`status_${sub.status}`) || sub.status;
 
             return (
               <ListGroup.Item key={sub.id} style={{ opacity: sub.status === 'active' ? 1 : 0.6 }}>
@@ -274,7 +275,7 @@ const SubscriptionsPage = () => {
                           textTransform: 'capitalize'
                         }}
                       >
-                        {sub.status}
+                        {statusLabel}
                       </Badge>
                     </div>
                     <div className="text-muted small">

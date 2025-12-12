@@ -6,6 +6,7 @@ import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, L
 import { Pie, Bar, Line } from 'react-chartjs-2';
 import { getCategoryColor } from '../categories';
 import { usePlan } from '../context/PlanContext';
+import { useLanguage } from '../context/LanguageContext';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
 
@@ -22,6 +23,7 @@ interface Subscription {
 
 const HomePage = () => {
   const { isPro } = usePlan();
+  const { t } = useLanguage();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,7 +36,7 @@ const HomePage = () => {
         setSubscriptions(response.data.subscriptions || []);
         setError('');
       } catch (error) {
-        setError('Failed to load subscriptions');
+        setError(t('subscriptions_error_load') || 'Failed to load subscriptions');
         console.error('Error fetching subscriptions', error);
       } finally {
         setLoading(false);
@@ -108,10 +110,10 @@ const HomePage = () => {
     .reduce((sum, sub) => sum + sub.amount, 0);
 
   const barChartData = {
-    labels: ['Monthly', 'Yearly'],
+    labels: [t('dashboard_label_monthly'), t('dashboard_label_yearly')],
     datasets: [
       {
-        label: 'Total Amount (€)',
+        label: t('dashboard_bar_label'),
         data: [monthlyTotal, yearlyTotal],
         backgroundColor: ['#6366f1', '#8b5cf6'],
         borderWidth: 2,
@@ -172,7 +174,7 @@ const HomePage = () => {
     }),
     datasets: [
       {
-        label: 'Monthly Spending (€)',
+        label: t('dashboard_line_label'),
         data: Object.values(monthlyHistory),
         borderColor: '#6366f1',
         backgroundColor: 'rgba(99, 102, 241, 0.2)',
@@ -261,7 +263,7 @@ const HomePage = () => {
 
   return (
     <Container className="mt-4">
-      <h1>Dashboard</h1>
+      <h1>{t('dashboard_title')}</h1>
       {!isPro && (
         <Alert
           variant="dark"
@@ -270,7 +272,7 @@ const HomePage = () => {
         >
           <div>
             <div className="fw-bold">New: Plaid-powered payments in Tracksub Pro</div>
-            <div className="text-muted small">Keep manual entry free. Upgrade for Pro checkout; bank sync via Stripe is coming.</div>
+            <div className="text-muted small">{t('dashboard_banner')}</div>
           </div>
           <Link to="/billing">
             <Button variant="primary">Upgrade to Pro</Button>
@@ -284,7 +286,7 @@ const HomePage = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <Card.Title>Monthly Cost</Card.Title>
+              <Card.Title>{t('dashboard_monthly_cost')}</Card.Title>
               <h2>€{totalMonthly.toFixed(2)}</h2>
             </Card.Body>
           </Card>
@@ -292,7 +294,7 @@ const HomePage = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <Card.Title>Yearly Cost</Card.Title>
+              <Card.Title>{t('dashboard_yearly_cost')}</Card.Title>
               <h2>€{totalYearly.toFixed(2)}</h2>
             </Card.Body>
           </Card>
@@ -300,7 +302,7 @@ const HomePage = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <Card.Title>Active</Card.Title>
+              <Card.Title>{t('status_active')}</Card.Title>
               <h2>{activeCount}</h2>
             </Card.Body>
           </Card>
@@ -308,10 +310,10 @@ const HomePage = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <Card.Title>Total Subscriptions</Card.Title>
+              <Card.Title>{t('dashboard_total_subs')}</Card.Title>
               <h2>{subscriptions.length}</h2>
               <small className="text-muted">
-                {inactiveCount} inactive, {cancelledCount} cancelled
+                {inactiveCount} {t('status_inactive')}, {cancelledCount} {t('status_cancelled')}
               </small>
             </Card.Body>
           </Card>
@@ -324,7 +326,7 @@ const HomePage = () => {
             <Col md={12}>
               <Card>
                 <Card.Body>
-                  <Card.Title>Monthly Spending History</Card.Title>
+                  <Card.Title>{t('dashboard_chart_spending_history')}</Card.Title>
                   <div style={{ height: '300px' }}>
                     <Line data={lineChartData} options={lineChartOptions} />
                   </div>
@@ -337,7 +339,7 @@ const HomePage = () => {
             <Col md={4}>
               <Card>
                 <Card.Body>
-                  <Card.Title>Subscriptions by Cost</Card.Title>
+                  <Card.Title>{t('dashboard_chart_by_cost')}</Card.Title>
                   <div style={{ height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Pie data={pieChartData} options={chartOptions} />
                   </div>
@@ -347,7 +349,7 @@ const HomePage = () => {
             <Col md={4}>
               <Card>
                 <Card.Body>
-                  <Card.Title>By Category</Card.Title>
+                  <Card.Title>{t('dashboard_chart_by_category')}</Card.Title>
                   <div style={{ height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Pie data={categoryChartData} options={chartOptions} />
                   </div>
@@ -357,7 +359,7 @@ const HomePage = () => {
             <Col md={4}>
               <Card>
                 <Card.Body>
-                  <Card.Title>Monthly vs Yearly</Card.Title>
+                  <Card.Title>{t('dashboard_chart_monthly_yearly')}</Card.Title>
                   <div style={{ height: '300px' }}>
                     <Bar data={barChartData} options={chartOptions} />
                   </div>
@@ -370,9 +372,9 @@ const HomePage = () => {
         <Card className="mt-4">
           <Card.Body className="text-center py-5">
             <div style={{ fontSize: '4rem', opacity: 0.3 }}>📈</div>
-            <h4 className="mt-3">No Data to Display</h4>
+            <h4 className="mt-3">{t('dashboard_no_data_title')}</h4>
             <p className="text-muted">
-              Add subscriptions to see charts and analytics of your spending
+              {t('dashboard_no_data_desc')}
             </p>
           </Card.Body>
         </Card>
@@ -380,16 +382,16 @@ const HomePage = () => {
 
       <Card className="mt-4">
         <Card.Body>
-          <Card.Title>Your Subscriptions</Card.Title>
+          <Card.Title>{t('dashboard_your_subscriptions')}</Card.Title>
           <ListGroup variant="flush">
             {subscriptions.length === 0 ? (
               <ListGroup.Item className="text-center py-5">
                 <div style={{ fontSize: '4rem', opacity: 0.3 }}>📊</div>
-                <h4 className="mt-3">No Subscriptions Yet</h4>
-                <p className="text-muted">Start tracking your subscriptions to see your spending overview</p>
-                <Link to="/add-subscription">
+                <h4 className="mt-3">{t('dashboard_no_subs_title')}</h4>
+                <p className="text-muted">{t('dashboard_no_subs_desc')}</p>
+                <Link to="/subscriptions">
                   <Button variant="primary" size="lg" className="mt-2">
-                    Add Your First Subscription
+                    {t('dashboard_add_first_sub')}
                   </Button>
                 </Link>
               </ListGroup.Item>
@@ -405,6 +407,7 @@ const HomePage = () => {
                   }
                 };
                 const statusColor = getStatusColor();
+                const statusLabel = t(`status_${sub.status}`) || sub.status;
                 
                 // Calculate subscription age
                 const startDate = new Date(sub.start_date);
@@ -450,7 +453,7 @@ const HomePage = () => {
                             textTransform: 'capitalize'
                           }}
                         >
-                          {sub.status}
+                          {statusLabel}
                         </Badge>
                         <Badge 
                           bg="light"
@@ -465,7 +468,7 @@ const HomePage = () => {
                         </div>
                       </div>
                       <div className="text-end">
-                        <div>Next payment</div>
+                        <div>{t('dashboard_next_payment')}</div>
                         <div className="text-muted">{sub.next_payment_date}</div>
                       </div>
                     </div>
