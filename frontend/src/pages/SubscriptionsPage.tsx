@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import { Container, Card, ListGroup, Badge, Button, Form, Row, Col, Alert, Spinner, Modal } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getCategoryColor, CATEGORIES } from '../categories';
 
 interface Subscription {
@@ -24,7 +24,17 @@ const SubscriptionsPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const navigate = useNavigate();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({
+    name: '',
+    billing_cycle: 'monthly',
+    start_date: '',
+    amount: '',
+    category: 'Other',
+    status: 'active',
+  });
+  const [addError, setAddError] = useState('');
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     fetchSubscriptions();
@@ -32,7 +42,7 @@ const SubscriptionsPage = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [subscriptions, categoryFilter, statusFilter]);
+  }, [subscriptions, categoryFilter, statusFilter, applyFilters]);
 
   const fetchSubscriptions = async () => {
     setLoading(true);
@@ -48,7 +58,7 @@ const SubscriptionsPage = () => {
     }
   };
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...subscriptions];
 
     if (categoryFilter !== 'all') {
@@ -60,11 +70,58 @@ const SubscriptionsPage = () => {
     }
 
     setFilteredSubscriptions(filtered);
-  };
+  }, [subscriptions, categoryFilter, statusFilter]);
 
   const handleDeleteClick = (id: number) => {
     setDeleteId(id);
     setShowDeleteModal(true);
+  };
+
+  const handleAddChange = (field: string, value: string) => {
+    setAddForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddError('');
+    setAdding(true);
+    try {
+      const start = new Date(addForm.start_date);
+      const today = new Date();
+      let nextPayment = new Date(start);
+      while (nextPayment <= today) {
+        if (addForm.billing_cycle === 'monthly') {
+          nextPayment.setMonth(nextPayment.getMonth() + 1);
+        } else {
+          nextPayment.setFullYear(nextPayment.getFullYear() + 1);
+        }
+      }
+
+      await api.post('/subscriptions', {
+        name: addForm.name,
+        billing_cycle: addForm.billing_cycle,
+        start_date: addForm.start_date,
+        next_payment_date: nextPayment.toISOString().split('T')[0],
+        amount: parseFloat(addForm.amount),
+        category: addForm.category,
+        status: addForm.status,
+      });
+
+      setShowAddModal(false);
+      setAddForm({
+        name: '',
+        billing_cycle: 'monthly',
+        start_date: '',
+        amount: '',
+        category: 'Other',
+        status: 'active',
+      });
+      fetchSubscriptions();
+    } catch (error: any) {
+      setAddError(error?.response?.data?.message || 'Failed to add subscription');
+    } finally {
+      setAdding(false);
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -116,9 +173,7 @@ const SubscriptionsPage = () => {
     <Container className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Manage Subscriptions</h1>
-        <Link to="/add-subscription">
-          <Button variant="primary">Add Subscription</Button>
-        </Link>
+        <Button variant="primary" onClick={() => setShowAddModal(true)}>Add Subscription</Button>
       </div>
 
       {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
@@ -171,11 +226,9 @@ const SubscriptionsPage = () => {
                 : 'Try adjusting your filters'}
             </p>
             {subscriptions.length === 0 && (
-              <Link to="/add-subscription">
-                <Button variant="primary" size="lg" className="mt-2">
-                  Add Subscription
-                </Button>
-              </Link>
+              <Button variant="primary" size="lg" className="mt-2" onClick={() => setShowAddModal(true)}>
+                Add Subscription
+              </Button>
             )}
           </Card.Body>
         </Card>
@@ -265,6 +318,95 @@ const SubscriptionsPage = () => {
             Delete
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Subscription</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {addError && <Alert variant="danger" dismissible onClose={() => setAddError('')}>{addError}</Alert>}
+          <Form onSubmit={handleAddSubmit}>
+            <Form.Group controlId="add-name" className="mb-3">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={addForm.name}
+                onChange={(e) => handleAddChange('name', e.target.value)}
+                required
+              />
+            </Form.Group>
+            <Row className="g-3">
+              <Col md={6}>
+                <Form.Group controlId="add-billing" className="mb-3">
+                  <Form.Label>Billing Cycle</Form.Label>
+                  <Form.Select
+                    value={addForm.billing_cycle}
+                    onChange={(e) => handleAddChange('billing_cycle', e.target.value)}
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="add-status" className="mb-3">
+                  <Form.Label>Status</Form.Label>
+                  <Form.Select
+                    value={addForm.status}
+                    onChange={(e) => handleAddChange('status', e.target.value)}
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="cancelled">Cancelled</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group controlId="add-start-date" className="mb-3">
+              <Form.Label>Start Date</Form.Label>
+              <Form.Control
+                type="date"
+                value={addForm.start_date}
+                onChange={(e) => handleAddChange('start_date', e.target.value)}
+                required
+              />
+            </Form.Group>
+            <Row className="g-3">
+              <Col md={6}>
+                <Form.Group controlId="add-amount" className="mb-3">
+                  <Form.Label>Amount (€)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    value={addForm.amount}
+                    onChange={(e) => handleAddChange('amount', e.target.value)}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="add-category" className="mb-3">
+                  <Form.Label>Category</Form.Label>
+                  <Form.Select
+                    value={addForm.category}
+                    onChange={(e) => handleAddChange('category', e.target.value)}
+                  >
+                    {CATEGORIES.map(cat => (
+                      <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="secondary" onClick={() => setShowAddModal(false)}>Cancel</Button>
+              <Button type="submit" variant="primary" disabled={adding}>
+                {adding ? 'Adding...' : 'Add'}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
       </Modal>
     </Container>
   );

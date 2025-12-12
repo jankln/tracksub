@@ -7,7 +7,6 @@ import WelcomePage from './pages/WelcomePage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AddSubscriptionPage from './pages/AddSubscriptionPage';
 import EditSubscriptionPage from './pages/EditSubscriptionPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -65,14 +64,6 @@ function App() {
             ) : (
               <Navigate to="/welcome" />
             )
-          }
-        />
-        <Route
-          path="/add-subscription"
-          element={
-            <PrivateRoute>
-              <AddSubscriptionPage />
-            </PrivateRoute>
           }
         />
         <Route
