@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { usePlan, usePlanCatalog } from '../context/PlanContext';
 import { createCheckoutSession, createPortalSession } from '../api/billing';
 
-const currencySymbol = 'ƒ'ª';
+const currencySymbol = '€';
 
 const BillingPage = () => {
   const { plan, currentPlan, isPro, refreshPlan, loading } = usePlan();
