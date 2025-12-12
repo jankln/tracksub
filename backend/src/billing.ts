@@ -276,22 +276,31 @@ router.post('/financial-connections/sync', protectedRoute, async (req: AuthReque
     let newTransactions = 0;
     let latestTransacted = since || 0;
 
-    const pager = stripe!.financialConnections.transactions.list(listParams);
-    for await (const tx of pager) {
-      const existing = await FinancialTransaction.findOne({ where: { transaction_id: tx.id } });
-      if (existing) continue;
-      await FinancialTransaction.create({
-        user_id: user.id,
-        account_id: tx.account,
-        transaction_id: tx.id,
-        amount: tx.amount,
-        currency: tx.currency,
-        description: tx.description,
-        status: tx.status,
-        transacted_at: new Date(tx.transacted_at * 1000).toISOString(),
-      });
-      newTransactions += 1;
-      latestTransacted = Math.max(latestTransacted, tx.transacted_at);
+    try {
+      const pager = stripe!.financialConnections.transactions.list(listParams);
+      for await (const tx of pager) {
+        const existing = await FinancialTransaction.findOne({ where: { transaction_id: tx.id } });
+        if (existing) continue;
+        await FinancialTransaction.create({
+          user_id: user.id,
+          account_id: tx.account,
+          transaction_id: tx.id,
+          amount: tx.amount,
+          currency: tx.currency,
+          description: tx.description,
+          status: tx.status,
+          transacted_at: new Date(tx.transacted_at * 1000).toISOString(),
+        });
+        newTransactions += 1;
+        latestTransacted = Math.max(latestTransacted, tx.transacted_at);
+      }
+    } catch (err: any) {
+      if (err?.raw?.code === 'financial_connections_no_successful_transaction_refresh') {
+        return res
+          .status(202)
+          .json({ message: 'No transactions available yet. Please retry after refresh completes.', new_transactions: 0 });
+      }
+      throw err;
     }
 
     await user.update({
