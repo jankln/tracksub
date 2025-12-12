@@ -40,10 +40,6 @@ const SubscriptionsPage = () => {
     fetchSubscriptions();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [subscriptions, categoryFilter, statusFilter, applyFilters]);
-
   const fetchSubscriptions = async () => {
     setLoading(true);
     try {
@@ -71,6 +67,10 @@ const SubscriptionsPage = () => {
 
     setFilteredSubscriptions(filtered);
   }, [subscriptions, categoryFilter, statusFilter]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [subscriptions, categoryFilter, statusFilter, applyFilters]);
 
   const handleDeleteClick = (id: number) => {
     setDeleteId(id);
