@@ -105,16 +105,16 @@ const HomePage = () => {
     .filter(sub => sub.billing_cycle === 'monthly')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
-  const yearlyTotal = subscriptions
+  const yearlyMonthlyEquivalent = subscriptions
     .filter(sub => sub.billing_cycle === 'yearly')
-    .reduce((sum, sub) => sum + sub.amount, 0);
+    .reduce((sum, sub) => sum + sub.amount / 12, 0);
 
   const barChartData = {
     labels: [t('dashboard_label_monthly'), t('dashboard_label_yearly')],
     datasets: [
       {
         label: t('dashboard_bar_label'),
-        data: [monthlyTotal, yearlyTotal],
+        data: [monthlyTotal, yearlyMonthlyEquivalent],
         backgroundColor: ['#6366f1', '#8b5cf6'],
         borderWidth: 2,
         borderColor: 'rgba(15, 23, 42, 0.8)',
