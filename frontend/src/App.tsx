@@ -12,6 +12,7 @@ import EditSubscriptionPage from './pages/EditSubscriptionPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
 import SettingsPage from './pages/SettingsPage';
 import BillingPage from './pages/BillingPage';
+import BankSyncPage from './pages/BankSyncPage';
 
 function App() {
   const isAuthenticated = () => {
@@ -103,6 +104,14 @@ function App() {
           element={
             <PrivateRoute>
               <BillingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/bank-sync"
+          element={
+            <PrivateRoute>
+              <BankSyncPage />
             </PrivateRoute>
           }
         />

@@ -47,6 +47,7 @@ const NavigationBar = () => {
                 <Nav.Link as={Link} to="/subscriptions" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Subscriptions</Nav.Link>
                 <Nav.Link as={Link} to="/add-subscription" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Add Subscription</Nav.Link>
                 <Nav.Link as={Link} to="/billing" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Billing</Nav.Link>
+                <Nav.Link as={Link} to="/bank-sync" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Bank Sync</Nav.Link>
                 <Nav.Link as={Link} to="/settings" style={{ color: '#e2e8f0', fontWeight: '500', marginLeft: '1rem' }}>Settings</Nav.Link>
               </>
             )}
