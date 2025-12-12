@@ -46,8 +46,10 @@ const HomePage = () => {
     fetchSubscriptions();
   }, []);
 
-  const totalMonthly = subscriptions
-    .filter(sub => sub.status === 'active')
+  const visibleSubscriptions = subscriptions.filter(sub => sub.status !== 'cancelled');
+  const activeSubscriptions = visibleSubscriptions.filter(sub => sub.status === 'active');
+
+  const totalMonthly = activeSubscriptions
     .reduce((sum, sub) => {
       if (sub.billing_cycle === 'monthly') {
         return sum + sub.amount;
@@ -58,16 +60,15 @@ const HomePage = () => {
 
   const totalYearly = totalMonthly * 12;
 
-  const activeCount = subscriptions.filter(sub => sub.status === 'active').length;
-  const inactiveCount = subscriptions.filter(sub => sub.status === 'inactive').length;
-  const cancelledCount = subscriptions.filter(sub => sub.status === 'cancelled').length;
+  const activeCount = activeSubscriptions.length;
+  const inactiveCount = visibleSubscriptions.filter(sub => sub.status === 'inactive').length;
 
   // Pie chart data - show all subscriptions
   const pieChartData = {
-    labels: subscriptions.map(sub => sub.name),
+    labels: visibleSubscriptions.map(sub => sub.name),
     datasets: [
       {
-        data: subscriptions.map(sub => {
+        data: visibleSubscriptions.map(sub => {
           return sub.billing_cycle === 'yearly' ? sub.amount / 12 : sub.amount;
         }),
         backgroundColor: [
@@ -82,7 +83,7 @@ const HomePage = () => {
 
   // Category chart data - show all subscriptions
   const categoryData: { [key: string]: number } = {};
-  subscriptions.forEach(sub => {
+  visibleSubscriptions.forEach(sub => {
     if (categoryData[sub.category]) {
       categoryData[sub.category] += sub.amount;
     } else {
@@ -103,11 +104,11 @@ const HomePage = () => {
   };
 
   // Bar chart for monthly vs yearly - show all subscriptions
-  const monthlyTotal = subscriptions
+  const monthlyTotal = visibleSubscriptions
     .filter(sub => sub.billing_cycle === 'monthly')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
-  const yearlyTotal = subscriptions
+  const yearlyTotal = visibleSubscriptions
     .filter(sub => sub.billing_cycle === 'yearly')
     .reduce((sum, sub) => sum + sub.amount, 0);
 
@@ -136,7 +137,7 @@ const HomePage = () => {
       months[monthKey] = 0;
     }
 
-    subscriptions.forEach(sub => {
+    visibleSubscriptions.forEach(sub => {
       const startDate = new Date(sub.start_date);
       startDate.setHours(0, 0, 0, 0);
       
@@ -313,16 +314,16 @@ const HomePage = () => {
           <Card className="text-center">
             <Card.Body>
               <Card.Title>{t('dashboard_total_subs')}</Card.Title>
-              <h2>{subscriptions.length}</h2>
+              <h2>{visibleSubscriptions.length}</h2>
               <small className="text-muted">
-                {inactiveCount} {t('status_inactive')}, {cancelledCount} {t('status_cancelled')}
+                {inactiveCount} {t('status_inactive')}
               </small>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      {subscriptions.length > 0 ? (
+      {visibleSubscriptions.length > 0 ? (
         <>
           <Row className="mt-4">
             <Col md={12}>
@@ -386,7 +387,7 @@ const HomePage = () => {
         <Card.Body>
           <Card.Title>{t('dashboard_your_subscriptions')}</Card.Title>
           <ListGroup variant="flush">
-            {subscriptions.length === 0 ? (
+            {visibleSubscriptions.length === 0 ? (
               <ListGroup.Item className="text-center py-5">
                 <div style={{ fontSize: '4rem', opacity: 0.3 }}>📊</div>
                 <h4 className="mt-3">{t('dashboard_no_subs_title')}</h4>
@@ -398,7 +399,15 @@ const HomePage = () => {
                 </Link>
               </ListGroup.Item>
             ) : (
-              subscriptions.map((sub) => {
+              visibleSubscriptions
+                .slice()
+                .sort((a, b) => {
+                  if (a.status !== b.status) {
+                    return a.status === 'active' ? -1 : 1;
+                  }
+                  return b.amount - a.amount;
+                })
+                .map((sub) => {
                 const categoryColor = getCategoryColor(sub.category);
                 const getStatusColor = () => {
                   switch(sub.status) {
