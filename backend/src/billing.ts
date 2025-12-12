@@ -248,6 +248,7 @@ router.post('/financial-connections/sync', protectedRoute, async (req: AuthReque
       return res.status(400).json({ message: 'No financial account linked to this user.' });
     }
 
+    const unlimitedSync = user.email === 'kleinjan826@gmail.com';
     const now = new Date();
     const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
     let syncCount = user.financial_sync_count || 0;
@@ -256,7 +257,7 @@ router.post('/financial-connections/sync', protectedRoute, async (req: AuthReque
       syncMonth = monthKey;
       syncCount = 0;
     }
-    if (syncCount >= 2) {
+    if (!unlimitedSync && syncCount >= 2) {
       return res.status(429).json({ message: 'Sync limit reached. You can sync up to 2 times per month.' });
     }
 
@@ -295,7 +296,7 @@ router.post('/financial-connections/sync', protectedRoute, async (req: AuthReque
 
     await user.update({
       financial_sync_month: syncMonth,
-      financial_sync_count: syncCount + 1,
+      financial_sync_count: unlimitedSync ? syncCount : syncCount + 1,
       financial_last_sync_at: latestTransacted ? new Date(latestTransacted * 1000).toISOString() : user.financial_last_sync_at,
     });
 
