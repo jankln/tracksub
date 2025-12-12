@@ -28,10 +28,10 @@ const WelcomePage = () => {
               className="hero-logo mb-4"
             />
             <h1 className="hero-title">
-              Never Miss a Subscription Payment Again
+              Tracksub Pro keeps your subscriptions on autopilot
             </h1>
             <p className="hero-subtitle">
-              Track, manage, and get reminded about all your subscriptions in one place
+              Connect your bank once, we auto-fetch new subscriptions and keep reminders flowing. Manual entry stays free.
             </p>
             <div className="hero-buttons mt-4">
               <Button 
@@ -40,7 +40,7 @@ const WelcomePage = () => {
                 className="me-3 mb-2"
                 onClick={() => navigate('/register')}
               >
-                Get Started Free
+                Try Tracksub Free
               </Button>
               <Button 
                 variant="outline-light" 
@@ -48,7 +48,7 @@ const WelcomePage = () => {
                 className="mb-2"
                 onClick={() => navigate('/login')}
               >
-                Sign In
+                See Tracksub Pro
               </Button>
             </div>
           </div>
@@ -65,10 +65,9 @@ const WelcomePage = () => {
                   <div className="feature-icon mb-3">
                     📊
                   </div>
-                  <Card.Title className="feature-title">Track Everything</Card.Title>
+                  <Card.Title className="feature-title">Automatic bank sync</Card.Title>
                   <Card.Text className="feature-description">
-                    Keep all your subscriptions organized in one beautiful dashboard. 
-                    See what you're paying and when.
+                    Link your bank once and new subscriptions are pulled in automatically. No more manual chasing.
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -80,7 +79,7 @@ const WelcomePage = () => {
                   <div className="feature-icon mb-3">
                     📧
                   </div>
-                  <Card.Title className="feature-title">Smart Reminders</Card.Title>
+                  <Card.Title className="feature-title">Smart reminders</Card.Title>
                   <Card.Text className="feature-description">
                     Get email notifications before payments are due. 
                     Customize when you want to be reminded.
@@ -95,10 +94,9 @@ const WelcomePage = () => {
                   <div className="feature-icon mb-3">
                     💰
                   </div>
-                  <Card.Title className="feature-title">Save Money</Card.Title>
+                  <Card.Title className="feature-title">Manual stays free</Card.Title>
                   <Card.Text className="feature-description">
-                    See exactly how much you're spending each month. 
-                    Cancel subscriptions you don't need.
+                    Prefer to type? Keep manual entry forever on the free plan. Pro adds automatic sync and faster support.
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -113,20 +111,20 @@ const WelcomePage = () => {
           <Row className="text-center fade-in">
             <Col md={4} className="mb-4">
               <div className="stat-item">
-                <h2 className="stat-number">Simple</h2>
-                <p className="stat-label">Easy to use interface</p>
+                <h2 className="stat-number">Auto-imports</h2>
+                <p className="stat-label">New bank subscriptions fetched for you</p>
               </div>
             </Col>
             <Col md={4} className="mb-4">
               <div className="stat-item">
-                <h2 className="stat-number">Free</h2>
-                <p className="stat-label">No hidden costs</p>
+                <h2 className="stat-number">Free forever</h2>
+                <p className="stat-label">Manual entry and reminders included</p>
               </div>
             </Col>
             <Col md={4} className="mb-4">
               <div className="stat-item">
-                <h2 className="stat-number">Secure</h2>
-                <p className="stat-label">Your data is protected</p>
+                <h2 className="stat-number">Fast support</h2>
+                <p className="stat-label">Pro users jump the line</p>
               </div>
             </Col>
           </Row>
@@ -137,16 +135,16 @@ const WelcomePage = () => {
       <section className="cta-section py-5">
         <Container>
           <div className="text-center fade-in">
-            <h2 className="cta-title mb-4">Ready to Take Control?</h2>
+            <h2 className="cta-title mb-4">Ready for effortless tracking?</h2>
             <p className="cta-subtitle mb-4">
-              Join now and never miss a subscription payment again
+              Start free today. Upgrade to Pro when you want automatic bank sync and faster support.
             </p>
             <Button 
               variant="primary" 
               size="lg"
               onClick={() => navigate('/register')}
             >
-              Create Free Account
+              Get Started
             </Button>
           </div>
         </Container>
