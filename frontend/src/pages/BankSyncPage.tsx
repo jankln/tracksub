@@ -36,6 +36,19 @@ const BankSyncPage = () => {
   >([]);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
 
+  const categoryOptions = [
+    'Other',
+    'Streaming',
+    'Productivity',
+    'Cloud',
+    'Gaming',
+    'News',
+    'Music',
+    'Health',
+    'Education',
+    'Finance',
+  ];
+
   useEffect(() => {
     const bootstrap = async () => {
       setLoading(true);
@@ -123,7 +136,7 @@ const BankSyncPage = () => {
         billing_cycle: c.suggested_billing_cycle || 'monthly',
         next_payment_date: c.suggested_next_payment_date || c.transacted_at?.slice(0, 10) || '',
         amount: c.amount || 0,
-        category: 'Other',
+        category: categoryOptions[0],
         description: c.description || '',
         transacted_at: c.transacted_at || '',
         include: true,
@@ -332,18 +345,23 @@ const BankSyncPage = () => {
                     </Form.Group>
                   </Col>
                   <Col md={4}>
-                    <Form.Group controlId={`category-${idx}`}>
-                      <Form.Label>Category</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={c.category}
-                        onChange={(e) => {
-                          const next = [...candidates];
-                          next[idx] = { ...next[idx], category: e.target.value };
-                          setCandidates(next);
-                        }}
-                      />
-                    </Form.Group>
+                  <Form.Group controlId={`category-${idx}`}>
+                    <Form.Label>Category</Form.Label>
+                    <Form.Select
+                      value={c.category}
+                      onChange={(e) => {
+                        const next = [...candidates];
+                        next[idx] = { ...next[idx], category: e.target.value };
+                        setCandidates(next);
+                      }}
+                    >
+                      {categoryOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
                   </Col>
                 </Row>
               </Card.Body>
