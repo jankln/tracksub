@@ -138,9 +138,6 @@ const SettingsPage = () => {
               <Button variant="primary" onClick={handleLanguageSave}>
                 {t('settings_language_save')}
               </Button>
-              <Alert variant="secondary" className="mt-3">
-                <small>{t('settings_language_note')}</small>
-              </Alert>
             </Tab>
           </Tabs>
         </Card.Body>

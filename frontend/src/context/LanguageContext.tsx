@@ -41,7 +41,6 @@ const translationMap: Record<LanguageCode, Translations> = {
     settings_send_test: 'Send test notification',
     settings_language_label: 'Select your language',
     settings_language_save: 'Save language',
-    settings_language_note: 'Language is stored locally for now.',
 
     subscriptions_all_categories: 'All Categories',
     subscriptions_all_status: 'All Status',
@@ -107,7 +106,6 @@ const translationMap: Record<LanguageCode, Translations> = {
     settings_send_test: 'Testbenachrichtigung senden',
     settings_language_label: 'Wähle deine Sprache',
     settings_language_save: 'Sprache speichern',
-    settings_language_note: 'Die Sprache wird derzeit lokal gespeichert.',
 
     subscriptions_all_categories: 'Alle Kategorien',
     subscriptions_all_status: 'Alle Status',
@@ -173,7 +171,6 @@ const translationMap: Record<LanguageCode, Translations> = {
     settings_send_test: 'Envoyer un test',
     settings_language_label: 'Choisissez votre langue',
     settings_language_save: 'Enregistrer la langue',
-    settings_language_note: 'La langue est pour l’instant stockée localement.',
 
     subscriptions_all_categories: 'Toutes les catégories',
     subscriptions_all_status: 'Tous les statuts',
