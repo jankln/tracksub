@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './DarkTheme.css';
@@ -15,22 +15,30 @@ import BankSyncPage from './pages/BankSyncPage';
 import { LanguageProvider } from './context/LanguageContext';
 
 function App() {
-  const isAuthenticated = () => {
-    return localStorage.getItem('token') !== null;
-  };
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('token') !== null);
+
+  useEffect(() => {
+    const syncAuth = () => setIsAuthenticated(localStorage.getItem('token') !== null);
+    window.addEventListener('storage', syncAuth);
+    window.addEventListener('auth-change', syncAuth);
+    return () => {
+      window.removeEventListener('storage', syncAuth);
+      window.removeEventListener('auth-change', syncAuth);
+    };
+  }, []);
 
   const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
-    return isAuthenticated() ? children : <Navigate to="/welcome" />;
+    return isAuthenticated ? children : <Navigate to="/welcome" replace />;
   };
 
   const PublicRoute = ({ children }: { children: React.ReactElement }) => {
-    return !isAuthenticated() ? children : <Navigate to="/" />;
+    return !isAuthenticated ? children : <Navigate to="/" replace />;
   };
 
   return (
     <LanguageProvider>
       <Router>
-        {isAuthenticated() && <NavigationBar />}
+        {isAuthenticated && <NavigationBar />}
         <Routes>
           <Route
             path="/welcome"
@@ -59,7 +67,7 @@ function App() {
           <Route
             path="/"
             element={
-              isAuthenticated() ? (
+              isAuthenticated ? (
                 <PrivateRoute>
                   <HomePage />
                 </PrivateRoute>

@@ -19,7 +19,8 @@ const RegisterPage = () => {
       const response = await axios.post('/api/auth/register', { email, password });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userEmail', email);
-      navigate('/');
+      window.dispatchEvent(new Event('auth-change'));
+      navigate('/', { replace: true });
     } catch (error: any) {
       if (error.response) {
         if (error.response.status === 409 || error.response.data.message?.includes('UNIQUE')) {

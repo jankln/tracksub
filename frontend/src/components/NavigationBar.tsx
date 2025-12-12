@@ -12,7 +12,8 @@ const NavigationBar = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userEmail');
-    navigate('/login');
+    window.dispatchEvent(new Event('auth-change'));
+    navigate('/welcome', { replace: true });
   };
 
   return (
