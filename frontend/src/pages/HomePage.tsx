@@ -22,7 +22,7 @@ interface Subscription {
 }
 
 const HomePage = () => {
-  const { isPro } = usePlan();
+  const { isPro, loading: planLoading } = usePlan();
   const { t } = useLanguage();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
@@ -267,7 +267,7 @@ const HomePage = () => {
   return (
     <Container className="mt-4">
       <h1>{t('dashboard_title')}</h1>
-      {!isPro && (
+      {!planLoading && !isPro && (
         <Alert
           variant="dark"
           className="mt-3 d-flex justify-content-between align-items-center"
