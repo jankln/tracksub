@@ -23,14 +23,17 @@ const RegisterPage = () => {
       navigate('/', { replace: true });
     } catch (error: any) {
       if (error.response) {
-        if (error.response.status === 409 || error.response.data.message?.includes('UNIQUE')) {
-          setError('Email already registered. Please login instead');
-        } else if (error.response.status === 400) {
-          setError('Please provide valid email and password');
-        } else if (error.response.status === 500) {
-          setError('Server error. Please try again later');
+        const status = error.response.status;
+        const message = error.response.data?.message;
+
+        if (status === 409) {
+          setError('Email already registered. Please log in instead.');
+        } else if (status === 400) {
+          setError('Please provide a valid email and password.');
+        } else if (status === 500) {
+          setError('Server error. Please try again later.');
         } else {
-          setError(error.response.data.message || 'Registration failed');
+          setError(message || 'Registration failed.');
         }
       } else if (error.request) {
         setError('Cannot connect to server. Please check your connection');
