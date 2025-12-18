@@ -31,6 +31,21 @@
   background: rgba(255, 255, 255, 0.02);
 }
 
+.calendar-card {
+  width: 100%;
+  word-break: break-word;
+}
+
+.calendar-card-header {
+  font-size: 0.9rem;
+}
+
+.calendar-amount {
+  font-weight: 700;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .calendar-weekdays,
   .calendar-grid {
@@ -40,5 +55,14 @@
   .calendar-cell {
     min-height: 100px;
     padding: 6px;
+  }
+
+  .calendar-card-header {
+    font-size: 0.85rem;
+    gap: 6px;
+  }
+
+  .calendar-amount {
+    font-size: 0.85rem;
   }
 }

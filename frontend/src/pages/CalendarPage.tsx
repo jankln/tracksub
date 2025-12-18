@@ -194,19 +194,19 @@ const CalendarPage: React.FC = () => {
                   {dayEvents.map((ev) => (
                     <Card
                       key={ev.id}
-                      className="mb-2"
+                      className="mb-2 calendar-card"
                       style={{
                         background: ev.billing_cycle === 'monthly' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(16, 185, 129, 0.15)',
                         border: '1px solid rgba(148, 163, 184, 0.3)',
                       }}
                     >
                       <Card.Body className="p-2">
-                        <div className="d-flex justify-content-between align-items-center" style={{ fontSize: '0.9rem' }}>
+                        <div className="d-flex justify-content-between align-items-center calendar-card-header">
                           <div>
                             <div style={{ fontWeight: 700, color: '#e2e8f0' }}>{ev.name}</div>
                             <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{ev.billing_cycle === 'monthly' ? 'Monthly' : 'Yearly'}</div>
                           </div>
-                          <div style={{ fontWeight: 700, color: '#e2e8f0' }}>{formatCurrency(ev.amount)}</div>
+                          <div className="calendar-amount">{formatCurrency(ev.amount)}</div>
                         </div>
                         <div style={{ color: '#cbd5e1', fontSize: '0.75rem', marginTop: '4px' }}>{ev.category}</div>
                       </Card.Body>
