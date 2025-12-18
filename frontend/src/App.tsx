@@ -12,6 +12,7 @@ import SubscriptionsPage from './pages/SubscriptionsPage';
 import SettingsPage from './pages/SettingsPage';
 import BillingPage from './pages/BillingPage';
 import BankSyncPage from './pages/BankSyncPage';
+import CalendarPage from './pages/CalendarPage';
 import { LanguageProvider } from './context/LanguageContext';
 
 function App() {
@@ -113,6 +114,14 @@ function App() {
             element={
               <PrivateRoute>
                 <BankSyncPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <PrivateRoute>
+                <CalendarPage />
               </PrivateRoute>
             }
           />
