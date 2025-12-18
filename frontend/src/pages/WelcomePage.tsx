@@ -48,8 +48,11 @@ const WelcomePage = () => {
                 className="mb-2"
                 onClick={() => navigate('/login')}
               >
-                See Tracksub Pro
+                Log in
               </Button>
+              <div className="text-muted small w-100 mt-2">
+                Want more automation? <a href="/billing" style={{ color: '#a5b4fc', textDecoration: 'none', fontWeight: 700 }}>See Tracksub Pro</a>
+              </div>
             </div>
           </div>
         </Container>
