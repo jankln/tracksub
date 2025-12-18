@@ -32,6 +32,7 @@ interface UserAttributes {
   financial_sync_month: string | null;
   financial_sync_count: number;
   financial_last_sync_at: string | null;
+  calendar_token: string | null;
 }
 
 interface UserCreationAttributes
@@ -48,6 +49,7 @@ interface UserCreationAttributes
     | 'financial_sync_month'
     | 'financial_sync_count'
     | 'financial_last_sync_at'
+    | 'calendar_token'
   > {}
 
 // Subscription model interfaces
@@ -80,6 +82,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public financial_sync_month!: string | null;
   public financial_sync_count!: number;
   public financial_last_sync_at!: string | null;
+  public calendar_token!: string | null;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -141,6 +144,11 @@ User.init(
     financial_last_sync_at: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    calendar_token: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
     },
   },
   {
@@ -343,6 +351,7 @@ const ensureColumns = async () => {
   await ensure('users', 'financial_sync_month', { type: DataTypes.STRING, allowNull: true });
   await ensure('users', 'financial_sync_count', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
   await ensure('users', 'financial_last_sync_at', { type: DataTypes.STRING, allowNull: true });
+  await ensure('users', 'calendar_token', { type: DataTypes.STRING, allowNull: true, unique: true });
 
   await ensure('financial_transactions', 'linked_subscription_id', { type: DataTypes.INTEGER, allowNull: true });
 };

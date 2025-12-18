@@ -7,6 +7,7 @@ import authRouter from './auth';
 import subscriptionsRouter from './subscriptions';
 import settingsRouter from './settings';
 import billingRouter from './billing';
+import calendarRouter from './calendar';
 import { stripeWebhookHandler } from './stripeWebhook';
 import { checkAndSendNotifications } from './notifications';
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api/calendar', calendarRouter);
 
 // Debug endpoint to check subscriptions and dates
 app.get('/api/notifications/debug', async (req, res) => {
