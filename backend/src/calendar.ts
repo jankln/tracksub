@@ -66,7 +66,7 @@ router.get('/token', protectedRoute, async (req: AuthRequest, res: Response) => 
       await user.save();
     }
 
-    const icalUrl = `${appUrl.replace(/\\/$/, '')}/api/calendar/ics/${user.calendar_token}`;
+    const icalUrl = `${appUrl.replace(/\/$/, '')}/api/calendar/ics/${user.calendar_token}`;
     res.json({ ical_url: icalUrl, token: user.calendar_token });
   } catch (err) {
     console.error(err);
