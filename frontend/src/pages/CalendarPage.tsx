@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Container, Card, Button, Spinner, Badge } from 'react-bootstrap';
+import { Container, Card, Button, Spinner, Badge, InputGroup, FormControl } from 'react-bootstrap';
 import api from '../api/axios';
 import './CalendarPage.css';
 
@@ -36,6 +36,9 @@ const CalendarPage: React.FC = () => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  const [icalUrl, setIcalUrl] = useState('');
+  const [icalError, setIcalError] = useState('');
+  const [copyLabel, setCopyLabel] = useState('Copy link');
 
   useEffect(() => {
     const fetchSubscriptions = async () => {
@@ -53,6 +56,23 @@ const CalendarPage: React.FC = () => {
     };
 
     fetchSubscriptions();
+  }, []);
+
+  useEffect(() => {
+    const fetchIcal = async () => {
+      try {
+        const res = await api.get('/calendar/token');
+        setIcalUrl(res.data.ical_url);
+        setIcalError('');
+      } catch (err: any) {
+        if (err?.response?.status === 403) {
+          setIcalError('Calendar sync is available for Pro users.');
+        } else {
+          setIcalError('Unable to load calendar link right now.');
+        }
+      }
+    };
+    fetchIcal();
   }, []);
 
   const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -149,6 +169,40 @@ const CalendarPage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      <Card className="mb-3" style={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+        <Card.Body>
+          <div className="d-flex justify-content-between flex-wrap gap-2">
+            <div>
+              <Card.Title className="mb-1">Sync with Google/iCloud</Card.Title>
+              <Card.Text className="text-muted mb-0">Use this ICS link to subscribe in your calendar app.</Card.Text>
+            </div>
+            <div className="d-flex gap-2 align-items-center">
+              <Button
+                variant="outline-primary"
+                onClick={() => {
+                  if (icalUrl) {
+                    navigator.clipboard.writeText(icalUrl).then(() => {
+                      setCopyLabel('Copied!');
+                      setTimeout(() => setCopyLabel('Copy link'), 1500);
+                    });
+                  }
+                }}
+                disabled={!icalUrl}
+              >
+                {copyLabel}
+              </Button>
+              <Button variant="primary" href={icalUrl || '#'} target="_blank" disabled={!icalUrl}>
+                Open link
+              </Button>
+            </div>
+          </div>
+          <InputGroup className="mt-3">
+            <FormControl readOnly value={icalUrl || 'Pro required to generate ICS link'} />
+          </InputGroup>
+          {icalError && <div className="text-danger small mt-2">{icalError}</div>}
+        </Card.Body>
+      </Card>
 
       {loading ? (
         <div className="d-flex justify-content-center my-5">
