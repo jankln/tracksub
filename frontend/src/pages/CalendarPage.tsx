@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Card, Button, Spinner, Badge } from 'react-bootstrap';
 import api from '../api/axios';
+import './CalendarPage.css';
 
 interface Subscription {
   id: number;
@@ -161,30 +162,24 @@ const CalendarPage: React.FC = () => {
         </Card>
       ) : (
         <Card className="p-3" style={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
-          <div className="d-flex text-muted mb-2" style={{ fontSize: '0.85rem' }}>
-            <div style={{ width: '14.28%', textAlign: 'center' }}>Sun</div>
-            <div style={{ width: '14.28%', textAlign: 'center' }}>Mon</div>
-            <div style={{ width: '14.28%', textAlign: 'center' }}>Tue</div>
-            <div style={{ width: '14.28%', textAlign: 'center' }}>Wed</div>
-            <div style={{ width: '14.28%', textAlign: 'center' }}>Thu</div>
-            <div style={{ width: '14.28%', textAlign: 'center' }}>Fri</div>
-            <div style={{ width: '14.28%', textAlign: 'center' }}>Sat</div>
-          </div>
+          <div className="calendar-scroll">
+            <div className="calendar-weekdays text-muted mb-2">
+              <div>Sun</div>
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+            </div>
 
-          <div className="d-flex flex-wrap">
+            <div className="calendar-grid">
             {calendarDays.map(({ day, dateKey }) => {
               const dayEvents = day ? eventsByDate[dateKey] || [] : [];
               return (
                 <div
                   key={dateKey}
-                  style={{
-                    width: '14.28%',
-                    minHeight: '120px',
-                    border: '1px solid rgba(99, 102, 241, 0.12)',
-                    padding: '8px',
-                    boxSizing: 'border-box',
-                    background: day ? 'rgba(255,255,255,0.02)' : 'transparent',
-                  }}
+                  className={`calendar-cell${day ? ' calendar-cell-active' : ''}`}
                 >
                   {day && (
                     <div className="d-flex justify-content-between align-items-center mb-1" style={{ fontSize: '0.9rem', color: '#e2e8f0' }}>
@@ -220,6 +215,7 @@ const CalendarPage: React.FC = () => {
                 </div>
               );
             })}
+            </div>
           </div>
         </Card>
       )}

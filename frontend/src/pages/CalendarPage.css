@@ -1,0 +1,44 @@
+.calendar-scroll {
+  overflow-x: auto;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(80px, 1fr));
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(80px, 1fr));
+  border: 1px solid rgba(99, 102, 241, 0.12);
+}
+
+.calendar-cell {
+  min-height: 120px;
+  padding: 8px;
+  border-right: 1px solid rgba(99, 102, 241, 0.12);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+  background: transparent;
+}
+
+.calendar-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.calendar-cell-active {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (max-width: 768px) {
+  .calendar-weekdays,
+  .calendar-grid {
+    min-width: 640px;
+  }
+
+  .calendar-cell {
+    min-height: 100px;
+    padding: 6px;
+  }
+}
