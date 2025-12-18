@@ -6,6 +6,15 @@ import jwt from 'jsonwebtoken';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
+const autoProEmails = ['jana.pielen@eufh-med.de'];
+
+const applyAutoPro = async (user: User) => {
+  if (autoProEmails.includes(user.email) && user.plan !== 'pro') {
+    user.plan = 'pro';
+    user.subscription_status = 'active';
+    await user.save();
+  }
+};
 
 // Register
 router.post('/register', async (req, res) => {
@@ -22,6 +31,7 @@ router.post('/register', async (req, res) => {
       email,
       password: hash,
     });
+    await applyAutoPro(user);
 
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '24h' });
     res.status(201).json({ token });
@@ -50,6 +60,7 @@ router.post('/login', async (req, res) => {
     const isValidPassword = await bcrypt.compare(password, user.password);
     
     if (isValidPassword) {
+      await applyAutoPro(user);
       const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '24h' });
       res.status(200).json({ token });
     } else {
