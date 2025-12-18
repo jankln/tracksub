@@ -202,13 +202,13 @@ const CalendarPage: React.FC = () => {
                     >
                       <Card.Body className="p-2">
                         <div className="d-flex justify-content-between align-items-center calendar-card-header">
-                          <div>
-                            <div style={{ fontWeight: 700, color: '#e2e8f0' }}>{ev.name}</div>
-                            <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{ev.billing_cycle === 'monthly' ? 'Monthly' : 'Yearly'}</div>
+                          <div className="calendar-text">
+                            <div className="calendar-name">{ev.name}</div>
+                            <div className="calendar-cycle">{ev.billing_cycle === 'monthly' ? 'Monthly' : 'Yearly'}</div>
                           </div>
                           <div className="calendar-amount">{formatCurrency(ev.amount)}</div>
                         </div>
-                        <div style={{ color: '#cbd5e1', fontSize: '0.75rem', marginTop: '4px' }}>{ev.category}</div>
+                        <div className="calendar-category">{ev.category}</div>
                       </Card.Body>
                     </Card>
                   ))}

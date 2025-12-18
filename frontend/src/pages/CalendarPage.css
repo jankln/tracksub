@@ -38,11 +38,43 @@
 
 .calendar-card-header {
   font-size: 0.9rem;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .calendar-amount {
   font-weight: 700;
   color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.calendar-text {
+  min-width: 0;
+}
+
+.calendar-name {
+  font-weight: 700;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+}
+
+.calendar-cycle {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.calendar-category {
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -59,10 +91,19 @@
 
   .calendar-card-header {
     font-size: 0.85rem;
-    gap: 6px;
+    gap: 4px;
   }
 
   .calendar-amount {
     font-size: 0.85rem;
+  }
+
+  .calendar-name {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .calendar-category {
+    font-size: 0.7rem;
   }
 }
