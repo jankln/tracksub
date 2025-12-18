@@ -76,9 +76,7 @@ const WelcomePage = () => {
             <Col md={4} className="fade-in">
               <Card className="feature-card h-100 text-center">
                 <Card.Body>
-                  <div className="feature-icon mb-3">
-                    ĐY"S
-                  </div>
+                  <div className="feature-icon mb-3">🔗</div>
                   <Card.Title className="feature-title">Connect once</Card.Title>
                   <Card.Text className="feature-description">
                     Link your bank or start with manual entry. We pull in new subs automatically and keep your list clean.
@@ -90,9 +88,7 @@ const WelcomePage = () => {
             <Col md={4} className="fade-in">
               <Card className="feature-card h-100 text-center">
                 <Card.Body>
-                  <div className="feature-icon mb-3">
-                    ĐY"ơ
-                  </div>
+                  <div className="feature-icon mb-3">⏰</div>
                   <Card.Title className="feature-title">Get smart reminders</Card.Title>
                   <Card.Text className="feature-description">
                     We remind you before renewals hit so you can cancel what you don’t need—no more forgotten trials.
@@ -104,9 +100,7 @@ const WelcomePage = () => {
             <Col md={4} className="fade-in">
               <Card className="feature-card h-100 text-center">
                 <Card.Body>
-                  <div className="feature-icon mb-3">
-                    ĐY'ø
-                  </div>
+                  <div className="feature-icon mb-3">🧭</div>
                   <Card.Title className="feature-title">Stay in control</Card.Title>
                   <Card.Text className="feature-description">
                     Track all costs in one place, spot pricey renewals, and cancel faster. Manual entry stays free forever.
