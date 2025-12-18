@@ -24,6 +24,9 @@ interface CalendarEvent {
 const monthLabel = (date: Date) =>
   date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(amount);
+
 const CalendarPage: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
@@ -208,7 +211,7 @@ const CalendarPage: React.FC = () => {
                             <div style={{ fontWeight: 700, color: '#e2e8f0' }}>{ev.name}</div>
                             <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{ev.billing_cycle === 'monthly' ? 'Monthly' : 'Yearly'}</div>
                           </div>
-                          <div style={{ fontWeight: 700, color: '#e2e8f0' }}>ƒ'ª{ev.amount.toFixed(2)}</div>
+                          <div style={{ fontWeight: 700, color: '#e2e8f0' }}>{formatCurrency(ev.amount)}</div>
                         </div>
                         <div style={{ color: '#cbd5e1', fontSize: '0.75rem', marginTop: '4px' }}>{ev.category}</div>
                       </Card.Body>
